@@ -10,6 +10,7 @@ export const BOOKING_STATUSES = [
 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number]
 export type BookingLanguage = 'en' | 'lv' | 'ru'
+export const CURRENT_CONSENT_POLICY_VERSION = '2026-07-phase2'
 
 export type PublicBookingRequest = {
   name: string
@@ -129,7 +130,10 @@ export function parsePublicBookingRequest(input: unknown): ValidationResult<Publ
   if (language !== 'en' && language !== 'lv' && language !== 'ru') errors.language = 'Select a supported language.'
   if (customerNotes.length > LIMITS.notes) errors.customerNotes = 'Use no more than 1500 characters.'
   if (source.consentAccepted !== true) errors.consentAccepted = 'Consent is required.'
-  if (!consentPolicyVersion || consentPolicyVersion.length > LIMITS.policy) errors.consentPolicyVersion = 'The consent policy version is invalid.'
+  if (consentPolicyVersion !== CURRENT_CONSENT_POLICY_VERSION
+    || consentPolicyVersion.length > LIMITS.policy) {
+    errors.consentPolicyVersion = 'The consent policy version is invalid.'
+  }
   if (!isUuid(idempotencyKey)) errors.idempotencyKey = 'The request identifier is invalid.'
 
   if (Object.keys(errors).length) return { success: false, errors }

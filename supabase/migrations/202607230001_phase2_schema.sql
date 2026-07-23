@@ -267,6 +267,8 @@ alter table public.api_rate_limits enable row level security;
 revoke all on all tables in schema public from anon, authenticated;
 revoke all on all sequences in schema public from anon, authenticated;
 grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to service_role;
 
 -- Deliberately no public table policies. Public and administrator data access
 -- goes through Netlify Functions. The Supabase service role bypasses RLS.

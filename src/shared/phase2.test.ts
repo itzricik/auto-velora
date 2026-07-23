@@ -36,6 +36,48 @@ describe('Phase 2 shared contracts', () => {
     if (!parsed.success) expect(parsed.errors.services).toBeDefined()
   })
 
+  it('rejects stale or invented consent policy versions', () => {
+    const parsed = parsePublicBookingRequest({
+      name: 'Test Customer',
+      email: 'customer@example.test',
+      phone: '+37120000001',
+      vehicleCategoryId: '11111111-1111-4111-8111-111111111111',
+      vehicleDescription: 'Test vehicle',
+      serviceIds: ['22222222-2222-4222-8222-222222222222'],
+      requestedStart: '2030-01-02T09:00:00.000Z',
+      language: 'en',
+      consentAccepted: true,
+      consentPolicyVersion: 'made-up-version',
+      idempotencyKey: '33333333-3333-4333-8333-333333333333',
+    })
+    expect(parsed.success).toBe(false)
+    if (!parsed.success) expect(parsed.errors.consentPolicyVersion).toBeDefined()
+  })
+
+  it('discards browser-supplied prices so the server remains authoritative', () => {
+    const parsed = parsePublicBookingRequest({
+      name: 'Test Customer',
+      email: 'customer@example.test',
+      phone: '+37120000001',
+      vehicleCategoryId: '11111111-1111-4111-8111-111111111111',
+      vehicleDescription: 'Test vehicle',
+      serviceIds: ['22222222-2222-4222-8222-222222222222'],
+      requestedStart: '2030-01-02T09:00:00.000Z',
+      language: 'en',
+      consentAccepted: true,
+      consentPolicyVersion: '2026-07-phase2',
+      idempotencyKey: '33333333-3333-4333-8333-333333333333',
+      estimatedPriceCents: 1,
+      finalPriceCents: 1,
+    })
+
+    expect(parsed.success).toBe(true)
+    if (parsed.success) {
+      expect(parsed.data).not.toHaveProperty('estimatedPriceCents')
+      expect(parsed.data).not.toHaveProperty('finalPriceCents')
+    }
+  })
+
   it('calculates integer cents and duration using authoritative multipliers', () => {
     const estimate = calculateServerEstimate({
       vehicle: { id: 'suv', priceMultiplier: 1.25, durationMultiplier: 1.25 },

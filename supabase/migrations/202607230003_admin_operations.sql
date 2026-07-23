@@ -35,7 +35,14 @@ begin
     raise exception 'invalid booking interval' using errcode = '22023';
   end if;
 
-  if exists (
+  if (
+    p_starts_at is not null
+    or p_ends_at is not null
+    or (
+      p_new_status in ('confirmed', 'in_progress')
+      and p_new_status is distinct from v_booking.status
+    )
+  ) and exists (
     select 1 from public.blocked_periods block
     where (block.work_bay_id is null or block.work_bay_id = v_booking.work_bay_id)
       and tstzrange(block.starts_at, block.ends_at, '[)')

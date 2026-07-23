@@ -120,7 +120,7 @@ export async function adminUpdateBooking(
     note?: string
   },
 ): Promise<AdminBooking> {
-  const rows = await db.request<AdminBooking[]>('/rest/v1/rpc/admin_update_booking', {
+  const result = await db.request<AdminBooking | AdminBooking[]>('/rest/v1/rpc/admin_update_booking', {
     method: 'POST',
     body: JSON.stringify({
       p_booking_id: input.bookingId,
@@ -133,8 +133,9 @@ export async function adminUpdateBooking(
       p_note: input.note ?? '',
     }),
   })
-  if (!rows[0]) throw new Error('ADMIN_UPDATE_FAILED')
-  return rows[0]
+  const booking = Array.isArray(result) ? result[0] : result
+  if (!booking) throw new Error('ADMIN_UPDATE_FAILED')
+  return booking
 }
 
 export type BlockedPeriodRow = {

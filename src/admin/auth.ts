@@ -7,8 +7,10 @@ type SupabaseSession = {
 const SESSION_KEY = 'velora-admin-session'
 
 function config() {
-  const url = import.meta.env.VITE_SUPABASE_URL?.replace(/\/+$/, '')
+  const url = (import.meta.env.VITE_SUPABASE_URL
+    || (import.meta.env.MODE === 'e2e' ? 'https://supabase.test' : '')).replace(/\/+$/, '')
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    || (import.meta.env.MODE === 'e2e' ? 'e2e-anon-key' : '')
   if (!url || !anonKey) throw new Error('ADMIN_AUTH_NOT_CONFIGURED')
   return { url, anonKey }
 }
