@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parsePublicBookingRequest } from './contracts'
 import { calculateServerEstimate } from './pricing'
-import { createPublicAccessToken, createSecureReference, hashPublicAccessToken, hashRateLimitIdentifier } from './security'
+import { createPublicAccessToken, createSecureReference, derivePublicAccessToken, hashPublicAccessToken, hashRateLimitIdentifier } from './security'
 import { canTransitionBooking, isCancellationAllowed } from './status'
 
 describe('Phase 2 shared contracts', () => {
@@ -62,6 +62,13 @@ describe('Phase 2 shared contracts', () => {
     const second = await hashRateLimitIdentifier('a-strong-test-secret', 'email:anna@example.lv')
     expect(first).toBe(second)
     expect(first).toMatch(/^[a-f0-9]{64}$/)
+  })
+
+  it('derives the same secure access token for an idempotent retry', async () => {
+    const first = await derivePublicAccessToken('a-strong-test-secret', '33333333-3333-4333-8333-333333333333')
+    const second = await derivePublicAccessToken('a-strong-test-secret', '33333333-3333-4333-8333-333333333333')
+    expect(first).toBe(second)
+    expect(first.length).toBeGreaterThan(32)
   })
 
   it('enforces status transitions and cancellation cutoff', () => {

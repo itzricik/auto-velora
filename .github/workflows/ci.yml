@@ -35,5 +35,8 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Validate database schema
+        run: npm run test:schema
+
       - name: Build
         run: npm run build

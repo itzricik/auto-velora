@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build --configLoader runner",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:api": "vitest run netlify/functions",
+    "test:schema": "node scripts/validate-schema.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -41,3 +41,20 @@ export async function hashRateLimitIdentifier(secret: string, normalizedIdentifi
   const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(normalizedIdentifier))
   return bytesToHex(new Uint8Array(signature))
 }
+
+export async function derivePublicAccessToken(secret: string, idempotencyKey: string): Promise<string> {
+  if (secret.length < 16) throw new Error('ACCESS_TOKEN_SECRET_TOO_SHORT')
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(`booking-access:${idempotencyKey}`),
+  )
+  return bytesToBase64Url(new Uint8Array(signature))
+}
