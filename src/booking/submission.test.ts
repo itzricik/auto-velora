@@ -49,7 +49,7 @@ describe('booking submission modes', () => {
       serviceIds: ['exterior', 'interior'],
       selectedDate: '2030-01-02',
       estimatedPrice: 182,
-      estimatedHours: 8,
+      estimatedHours: 7.5,
     })
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(googleFormsTransport).not.toHaveBeenCalled()
