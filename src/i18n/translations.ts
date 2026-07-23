@@ -222,4 +222,247 @@ const en = {
     retentionTitle: 'Retention',
     retentionBody: 'Planned retention period: {retention}. The owner must define and apply a final retention schedule before launch.',
     rightsTitle: 'Deletion and privacy requests',
-    rightsBody: 'To request access, correctio�7����k�w��c�4/4/�.t.�,4at.4/4.4a�-t`t.�,4c�4.4/4-tat,4/t.4a�-t`t.�,4c�4-4-t.�/�/t`�,4/4.4/t,4a�.4c�4`t/�-�-4,4c�`�4a�.4`t`�`�c�4`t`�,4,t.4.�c4/t`�c�4/�`t/t/�,�`�4-4.�c�4-4,4.�c4/t-t.tb4-t.H4`4,4,t/�`�bˉ�K�]Z[��]N�	�%4-t`�-t.t.�.4/t,�4.4-�,4bt.4`�,	���N�	�(t/�,�.�,4`t/�,�,4/t/t`�c�4.�/�`4`4-t.�a�.4c�4/�a�.4`t`�.�`�4.4.�.4-�,4bt.4`�`�4,�b�/�/�.�/tc�-t/4/4-t`�/�-4.4a�/t/�8�%4/�,4/t-t.�c4-�,4/�,4/t-t.�c4c���K�[��X�[ێ��]N�	�)4.4/t,4.�c4/t,4c�4/�`4/�,�-t`4.�,4.�,4a�-t`t`�,�,	���N�	�'�`4/�,�-t`4c�-t/4a4.4/t.4b4/t,4/�`4,4,�.�-t/t/tb�/4`t,�-t`�/�/4/�,tb�c�`t/tc�-t/4`�at/�-4.4,�/4-t`t`�-H4/�`t/4,4`�`4.4,�,4-t/4,�/�`�/�,�b�.H4,4,�`�/�/4/�,t.4.�c��K�K�K��X�[�Έ^YX���Έ	�'�,4.�-t`�b��]N�	�'�/�/tc�`�/tb�-H4/�`�/�`4,4,�/tb�-H4`�/�a�.�.�4(�`�/�a�/t-t/t.4-H4/�/�`t.�-H4/�`t/4/�`�`4,����N�	�'�,4.�-t`�b�4/�,tb�-t-4.4/tc�c�`�4`4,4,t/�`�b�4.�/�`�/�`4b�-H4.�.�.4-t/t`�b�4,�b�,t.4`4,4c�`�4a�,4bt-H4,�`t-t,�/��4'4b�4/t-H4-4/�,t,4,�.4/4/�,t`4,4,t/�`�.�`�4.�/�`�/�`4,4c�4,4,�`�/�/4/�,t.4.�c�4/t-H4/t`�-�/t,���[\��	�)�,4`t`�b�.H4,�b�,t/�`	�����N�	�$�b�,t`4,4`�cۘ[Y_I��X��Y�\Έ\��[�X[���[YN�	�\��[�X[	�\�ܚ\[ێ�	�%4.�c�4`4-t,�`�.�c�`4/t/�,�/�4/�`4/�a4-t`t`t.4/�/t,4.�c4/t/�,�/�4`�at/�-4,��][\Έ��$t-t-�/�/�,4`t/t,4c�4/4/�.t.�,4.4-4-t`�-t.t.�.4/t,�4.�`�-�/�,�,	�	�%4.4`t.�.4b4.4/tb�4.4-4,�-t`4/tb�-H4/�`4/�dt/4b��	�'�b�.�-t`t/�`H4.4`�at/�-4-�,4/�/�,�-t`4at/t/�`t`�c�/4.4`t,4.�/�/t,	�	�(4`�a�/t,4c�4a4.4/t.4b4/t,4c�4-�,4bt.4`�,	�HK��\�ܙN���[YN�	ԙ\�ܙI�\�ܚ\[ێ�	�%4.�c�4,�.�`�,t/�.�/�.H4/�a�.4`t`�.�.4.4`�.�`�a�b4-t/t.4c�4/�/�.�`4b�`�.4cˉ�][\Έ��%4-t.�/�/t`�,4/4.4/t,4a�.4c�4.�`�-�/�,�,	�	�$�.�`�,t/�.�,4c�4/�a�.4`t`�.�,4`t,4.�/�/t,	�	�'�-4/t/�ct`�,4/�/t/�-H4`�.�`�a�b4-t/t.4-H4/�/�.�`4b�`�.4c��	�%�,4bt.4`�,4/�/�,�-t`4at/t/�`t`�.4/t,4`�`4.4/4-t`tc�a�,	�HK���X����[YN�	���X�	�\�ܚ\[ێ�	�%4.�c�4.�/�`4`4-t.�a�.4.4.4-4/�.�,�/�,�`4-t/4-t/t/t/�.H4-�,4bt.4`�bˉ�][\Έ��%4-t.�/�/t`�,4/4.4/t,4a�.4c�4.�`4,4`t.�.	�	�&�/�/t`�`4/�.�.4`4`�-t/4,4c�4.�/�`4`4-t.�a�.4c�4/�/�.�`4b�`�.4c��	�'t,4/t-t`t-t/t.4-H4.�-t`4,4/4.4.�.	�	�$�b�-4-t`4-�.�,4.4.�/�/t`t`�.�c4`�,4a�.4c�4/�/�4`�at/�-4`��HK�K�K��\N�^YX���Έ	�'�`�,�-t`�b�4/t,4,�/�/�`4/�`tb��]N�	�'�/�.�-t-�/t/�4-�/t,4`�c4-4/�4,�.4-�.4`�,���][\Έ\�][ێ��N�	�(t.�/�.�c4.�/�4,�`4-t/4-t/t.4-�,4/t.4/4,4-t`�4-4-t`�-t.t.�.4/t,���N�	�'�/�-4-4-t`4-�.4,�,4c�bt.4.H4-4-t`�-t.t.�.4/t,�4/4/�-�-t`�4-�,4/tc�`�c4-4,�,t`�`4.4a�,4`t,�4$�.�`�,t/�.�,4c�4/�a�.4`t`�.�,4`t,4.�/�/t,4.�/�`4`4-t.�a�.4c�4.4/�/�.�`4b�`�.4c�4`�`4-t,t`�c�`�4/�`�4/�-4/t/�,�/�4-4/�4/t-t`t.�/�.�c4.�.4aH4`4,4,t/�a�.4aH4-4/t-t.K�4'�`4-t-4,�,4`4.4`�-t.�c4/tb�.H4`t`4/�.�4/�/�c�,�.4`�`tc�4,�4`4,4`ta�dt`�-K4,4/�/�-4`�,�-t`4-4.4/4-t,�/�4/�/�`t.�-H4/�`t/4/�`�`4,��K��\\�N��N�	�'t`�-�/t/�4.�.4/�/�-4,�/�`�/�,�.4`�c4,4,�`�/�/4/�,t.4.�c��N�	�'�/�-�,4.�`�.t`t`�,4`�,t-t`4.4`�-H4a�-t/t/tb�-H4.4.�.4a�/tb�-H4,�-tbt.4.4-�4`t,4.�/�/t,4.4,t,4,�,4-�/t.4.�,�4'4b�`�c4/4,4b4.4/t`�4/�-t`4-t-4/�`4.4-t-�-4/�/4/t-H4/t`�-�/t/�8�%4/4b�4/�`4-t-4/�/�a�.4`�,4-t/4/�a�-t/t.4`�c4.4/�a�.4`t`�.4`�c4-tdH4/�/�4`t,�/�-t/4`�4/�`4/�a�-t`t`t`ˉ�K��\�[ZXΈ�N�	�(t.�/�.�c4.�/�4`t.�`�-�.4`�4.�-t`4,4/4.4a�-t`t.�/�-H4/�/�.�`4b�`�.4-O��N�	�(t`4/�.�4-�,4,�.4`t.4`�4/�`�4`t.4`t`�-t/4b�4/�/�.�`4b�`�.4c�4/�`4/�,t-t,�,4at`4,4/t-t/t.4c�4.4/�`4.4,�b�a�-t.�4/4/�.t.�.�4'4b�4/�`4-t-4.�/�-�.4/4,�,4`4.4,4/t`�4/�/�-4ct.�`t/�.�`�,4`�,4a�.4c�4,4,�`�/�/4/�,t.4.�c�4.4/�,tb�c�`t/t.4/4/t-t/�,tat/�-4.4/4b�.H4`�at/�-��K��ܘ]�\Έ�N�	�'4/�-�/t/�4.�.4/�/�.�/t/�`t`�c4c�4`�,t`4,4`�c4a�,4`4,4/�.4/tb���N�	�'4/t/�,�.4-H4.�dt,�.�.4-H4-4-ta4-t.�`�b�4/4/�-�/t/�4,t-t-�/�/�,4`t/t/�4`�/4-t/tc4b4.4`�c4.4.�.4`�-4,4.�.4`�c4/t/�4,�.�`�,t/�.�.4-H4a�,4`4,4/�.4/tb�4/4/�,�`�`�4/�`4/�at/�-4.4`�c4`t.�,�/�-�c4.�,4.��4'4b�4`t/�at`4,4/tc�-t/4-�-4/�`4/�,�c4-H4/�/�.�`4b�`�.4c�4.4/t-H4`�,t.4`4,4-t/4`t.�.4b4.�/�/4/4/t/�,�/�4/4,4`�-t`4.4,4.�,4`4,4-4.4/�-4/t/�,�/�4-4-ta4-t.�`�,��K��[�[�X�N��N�	�(4,4`ta�dt`�/t,4c�4a�-t/t,4/�.�/�/ta�,4`�-t.�c4/t,4c���N�	�'t-t`��4&�,4.�c4.�`�.�c�`�/�`8�%4/�`4/�-�`4,4a�/t,4c�4/�`�/�`4,4,�/t,4c�4`�/�a�.�,4/t,4/�`t/t/�,�-H4`4,4-�/4-t`4,4,4,�`�/�/4/�,t.4.�c�4.4,�b�,t`4,4/t/tb�aH4`�`t.�`�,ˈ4'�.�/�/ta�,4`�-t.�c4/t`�c�4a�-t/t`�4/�/�-4`�,�-t`4-�-4,4-t/4/�/�`t.�-H4/�a�-t/t.�.4`t/�`t`�/�c�/t.4c�4.4`t/�,�.�,4`t/�,�,4/t.4c�4/�,tb�dt/4,��K���][ێ��N�	�$�-4-H4/t,4at/�-4.4`�`tc�4`t`�`�-4.4c���N�	�'4b�4/t,4at/�-4.4/4`tc�4,�4(4.4,�-K�4(�/�a�/tb�.H4,4-4`4-t`H4/t,4ct`�/�.H4-4-t/4/�/t`t`�`4,4a�.4/�/t/t/�.H4`t`�`4,4/t.4a�-H8�%4-�,4/�/�.�/t.4`�-t.�c4.�/�`�/�`4b�.H4/t`�-�/t/�4-�,4/4-t/t.4`�c4/�/�-4`�,�-t`4-�-4dt/t/tb�/4,4-4`4-t`t/�/4/�-t`4-t-4-�,4/�`�`t.�/�/��K��[��[��N�	�)�`�/�4-4-t.�,4`�c4-t`t.�.4/t`�-�/t/�4/�`�/4-t/t.4`�c4-�,4/�.4`tc��N�	�(t/�/�,tbt.4`�-H4.�,4.�4/4/�-�/t/�4`4,4/tc4b4-K4a�`�/�,tb�4/4b�4/4/�,�.�.4/�`4-t-4.�/�-�.4`�c4,�`4-t/4c�4-4`4`�,�/�/4`�4.�.�.4-t/t`�`ˈ4'�.�/�/ta�,4`�-t.�c4/tb�-H4`�`t.�/�,�.4c�4/�`�/4-t/tb�4/t`�-�/t/�4/�/�-4`�,�-t`4-4.4`�c4/�`4.4-4/�,t,4,�.�-t/t.4.4`4,4,t/�a�-t.H4/�/�.�.4`�.4.�.4-�,4/�.4`t.��K�K�K�����[�Έ^YX���Έ	�%�,4/�`4/�`H4/t,4-�,4/�.4`tc	�[[�^YX���Έ	�%4-t/4/�/t`t`�`4,4a�.4c�4-�,4/�.4`t.	�]N�	�(4,4`t`t.�,4-�.4`�-H4/�,H4,4,�`�/�/4/�,t.4.�-K����N�	�'�`�/�`4,4,�c4`�-H4-�,4/�`4/�`H4/t,4`4,4`t`t/4/�`�`4-t/t.4-K�4'�/H4/�`t`�,4dt`�`tc�4/t-t/�/�-4`�,�-t`4-�-4dt/t/tb�/4/�/�.�,4/4b�4/�`�-4-t.�c4/t/�4/t-H4`t/�,�.�,4`t`�-t/4-4/�`t`�`�/�/t/�`t`�c4/�,tb�dt/4.4a�-t/t`ˉ�[[Л�N�	�%�,4/�/�.�/t.4`�-H4a4/�`4/4`�4a�`�/�,tb�4`�,�.4-4-t`�c4/�`4/�,�-t`4.�`�4-4,4/t/tb�aK4`4,4`ta�dt`�4a�-t/tb�4.4`t,�/�-4.�`�4-�,4/�`4/�`t,�4&4/ta4/�`4/4,4a�.4c�4/t-H4/�-t`4-t-4,4dt`�`tc�4.�/�/4/�,4/t.4.��[�[�ӛ�X�N�	�+t`�,4a4/�`4/4,4/�`�/�`4,4,�.�c�-t`�4-�,4/�`4/�`K4,4/t-H4/�/�-4`�,�-t`4-�-4dt/t/t`�c�4-�,4/�.4`tc�4'�.�/�/ta�,4`�-t.�c4/t/�-H4/�/�-4`�,�-t`4-�-4-t/t.4-H4/�/�`t`�`�/�.4`�4/�`�-4-t.�c4/t/�4/�/�4`�-t.�-ta4/�/t`�4.4.�.4ct.�-t.�`�`4/�/t/t/�.H4/�/�a�`�-K��[[ӛ�X�N�	�+t`�,4-4-t/4/�/t`t`�`4,4a�.4c�4`4,4,t/�`�,4-t`�4`�/�.�c4.�/�4/t,4`�-t.�`�bt-t.H4`t`�`4,4/t.4a�-H4,t`4,4`�-�-t`4,4.4/t-H4`t,�c�-�b�,�,4-t`�`tc�4`t/�4`t`�`�-4.4-t.K��[[��\��[�Έ	�%4-t/4/�/t`t`�`4,4a�.4c�4-4.�c�4/�/�`4`�a4/�.�.4/��4$�,�-t-4dt/t/tb�-H4-4,4/t/tb�-H4/t-H4/�`�/�`4,4,�.�c�c�`�`tc�4.4/t-H4`t/�at`4,4/tc�c�`�`tcˉ��[YN�	�&4/4c�4.4a4,4/4.4.�.4c��ۙN�	�'t/�/4-t`4`�-t.�-ta4/�/t,	�[XZ[�	�+t.�-t.�`�`4/�/t/t,4c�4/�/�a�`�,	��ZX�N�	�'4,4`4.�,4.4/4/�-4-t.�c4,4,�`�/�/4/�,t.4.�c���\��X�\Έ	�$�b�,t`4,4/t/tb�-H4`�`t.�`�,�.	�]N�	�%�-t.�,4-t/4,4c�4-4,4`�,	�Y\��Y�N�	�%4/�/�/�.�/t.4`�-t.�c4/t/�-H4`t/�/�,tbt-t/t.4-I��ۜ�[��	�+�4`4,4-�`4-tb4,4c��SԐH4.4`t/�/�.�c4-�/�,�,4`�c4ct`�.4-4,4/t/tb�-K4a�`�/�,tb�4/�`�,�-t`�.4`�c4/t,4/4/�.H4-�,4/�`4/�`K��[[��ۜ�[��	�+�4/�/�/t.4/4,4c�4a�`�/�4ct`�/�4-4-t/4/�/t`t`�`4,4a�.4c�4-4.�c�4/�/�`4`�a4/�.�.4/�4.4.4/ta4/�`4/4,4a�.4c�4/t-H4/�`�/�`4,4,�.�c�-t`�`tc�4.4/t-H4`t/�at`4,4/tc�-t`�`tcˉ��[ۘ[�	�'t-t/�,tc�-�,4`�-t.�c4/t/���X�Z�\�Έ��[YN�	�$�,4b4-H4.4/4c��ۙN�	�(�.�,4-�.4`�-H4.�/�-4`t`�`4,4/tb��[XZ[�	�.4/4c�4-4/�/4-t/K����ZX�N�	�/t,4/�`4.4/4-t`����͌	�Y\��Y�N�	�'�/�.4b4.4`�-H4`t/�`t`�/�c�/t.4-H4,4,�`�/�/4/�,t.4.�c�4.4.�.4-�-t.�,4-t/4b�.H4`4-t-�`�.�c4`�,4`���K�\�[X]SX�[�	�(4,4`ta�dt`�4/t,4`�`t`�`4/�.t`t`�,�-H4.�.�.4-t/t`�,	�\�[X]U�ZX�N�	�&�,4`�-t,�/�`4.4c�4,4,�`�/�/4/�,t.4.�c��\�[X]T�X�N�	�'�`4.4-t/t`�.4`4/�,�/�a�/t,4c�4a�-t/t,	�\�[X]Q\�][ێ�	�'�`4.4-t/t`�.4`4/�,�/�a�/t,4c�4-4.�.4`�-t.�c4/t/�`t`�c	��Y[�\�[X]N�	�(4,4`ta�dt`�4/t,4`�`t`�`4/�.t`t`�,�-H4.�.�.4-t/t`�,�4/�.�/�/ta�,4`�-t.�c4/tb�-H4-�/t,4a�-t/t.4c�4/�/�-4`�,�-t`4-�-4,4c�`�`tc�4/�/�`t.�-H4/�`t/4/�`�`4,	��X�[�ՙ\��[ێ�	�$�-t`4`t.4c�4a�-t/I���X�Z]�	�'�`�/�`4,4,�.4`�c4-�,4/�`4/�`I��X�Z][�Έ	�'�`�/�`4,4,�.�c�-t/4-�,4/�`4/�`x�)��[[��X�Z]�	�'�`4-t-4/�`4/�`t/4/�`�`4-�,4/�`4/�`t,	�[[��X�Z][�Έ	�'�/�-4,�/�`�,4,�.�.4,�,4-t/4-4-t/4/�/t`t`�`4,4a�.4c��)��[[��X��\�Έ	�%4-t/4/�/t`t`�`4,4a�.4c�4-4.�c�4/�/�`4`�a4/�.�.4/�4-�,4,�-t`4b4-t/t,��[[ӛԙ\�\��][ێ�	�(4-t,4.�c4/t,4c�4-�,4/�.4`tc4/t-H4`t/�-�-4,4,�,4.�,4`tc��[[ӛ��[��Z\��[ێ�	�&4/ta4/�`4/4,4a�.4c�4/t-H4/�-t`4-t-4,4,�,4.�,4`tc4.4/t-H4`t/�at`4,4/tc�.�,4`tc��[[��\��X�\Έ	�$�b�,t`4,4/t/tb�-H4`�`t.�`�,�.	�][\Y�	�$t`4,4`�-�-t`4/�/�/�b�`�,4.�`tc�4/�`�/�`4,4,�.4`�c4-�,4/�`4/�`H4/t,4-�,4/�.4`tc��][\Y]Z[�	�����H�ܛ\�4/t-H4/�`4-t-4/�`t`�,4,�.�c�-t`�4`t,4.t`�`�4/�`4/�,�-t`4c�-t/4b�.H4/�`�,�-t`��4%�,4/�`4/�`H4/�`t`�,4dt`�`tc�4/t-t/�/�-4`�,�-t`4-�-4dt/t/tb�/4/�/�.�,�SԐH4/t-H4`t,�c�-�-t`�`tc�4`H4,�,4/4.4/�`�-4-t.�c4/t/����Y�\�[��N�	�'t/�/4-t`4-�,4/�`4/�`t,	��Y�\�[��S��X�N�	�(t/�at`4,4/t.4`�-H4/t/�/4-t`4-4.�c�4`t,�c�-�.�4'�/H4/t-H4-4/�.�,4-�b�,�,4-t`�4a�`�/�4-�,4/�`4/�`H4`t/�at`4,4/tdt/H4.4.�.4/�`4.4/tc�`����[�X�Έ	�'�`�/�`4,4,�.4`�c4`�/�`�4-�-H4-�,4/�`4/�`H4/�/�4ct.�-t.�`�`4/�/t/t/�.H4/�/�a�`�-I��[�X��[�]�Z[X�N�	�(4-t-�-t`4,�/tb�.H4.�/�/t`�,4.�`�4-tbtdH4/t-H4/t,4`t`�`4/�-t/K���\��ܜΈ��[YN�	�$�,�-t-4.4`�-H4.4/4c�4.4a4,4/4.4.�.4c����[YU��ۙΈ	�&4`t/�/�.�c4-�`�.t`�-H4/t-H4,t/�.�-t-HL4`t.4/4,�/�.�/�,���ۙN�	�$�,�-t-4.4`�-H4.�/�`4`4-t.�`�/tb�.H4/t/�/4-t`4`�-t.�-ta4/�/t,��ۙU��ۙΈ	�&4`t/�/�.�c4-�`�.t`�-H4/t-H4,t/�.�-t-H̈4`t.4/4,�/�.�/�,���[XZ[�	�$�,�-t-4.4`�-H4.�/�`4`4-t.�`�/tb�.H4,4-4`4-t`H4/�/�a�`�bˉ�[XZ[��ۙΈ	�&4`t/�/�.�c4-�`�.t`�-H4/t-H4,t/�.�-t-H�M4`t.4/4,�/�.�/�,����ZX�N�	�$�,�-t-4.4`�-H4/4,4`4.�`�4.4/4/�-4-t.�c4,4,�`�/�/4/�,t.4.�cˉ��ZX�U��ۙΈ	�&4`t/�/�.�c4-�`�.t`�-H4/t-H4,t/�.�-t-HL�4`t.4/4,�/�.�/�,����\��X�\Έ	�$�b�,t-t`4.4`�-H4at/�`�c�4,tb�4/�-4/t`�4`�`t.�`�,�`ˉ�[�ۛ�۔�\��X�N�	�'�-4/t,4.4.�.4/t-t`t.�/�.�c4.�/�4`�`t.�`�,�4/t-H4`4,4`t/�/�-�/t,4/tbˉ�]N�	�$�b�,t-t`4.4`�-H4`t-t,�/�-4/tc�b4/tc�c�4.4.�.4,t`�-4`�bt`�c�4-4,4`�`ˉ�Y\��Y�U��ۙΈ	�&4`t/�/�.�c4-�`�.t`�-H4/t-H4,t/�.�-t-HML4`t.4/4,�/�.�/�,����ۜ�[��	�(t/�,�.�,4`t.4-H4/t-t/�,tat/�-4.4/4/�4a�`�/�,tb�4/4b�4/4/�,�.�.4/�`�,�-t`�.4`�c��[[��ۜ�[��	�'�/�-4`�,�-t`4-4.4`�-K4a�`�/�4/�/�/t.4/4,4-t`�-N�4ct`�/�4-4-t/4/�/t`t`�`4,4a�.4cˉ�\X�]N�	�$t`4,4`�-�-t`4`�-�-H4/�b�`�,4.�`tc�4/�`�/�`4,4,�.4`�c4ct`�/�`�4-�,4/�`4/�`K�4&4-�/4-t/t.4`�-H4-4,4/t/tb�-H4/�-t`4-t-4/�/�,�`�/�`4/t/�.H4/�`�/�`4,4,�.�/�.K��[[�\X�]N�	�+t`�,4-4-t/4/�/t`t`�`4,4a�.4c�4`�-�-H4-�,4,�-t`4b4-t/t,�4&4-�/4-t/t.4`�-H4-4,4/t/tb�-H4/�-t`4-t-4/�/�,�`�/�`4/tb�/4-�,4/�`�`t.�/�/���[�\�XΈ	�$t`4,4`�-�-t`4/t-H4`t/4/�,�4/�/�/�b�`�,4`�c4`tc�4/�`�/�`4,4,�.4`�c4-�,4/�`4/�`K��[[��[�\�XΈ	�'t-H4`�-4,4.�/�`tc4/�/�-4,�/�`�/�,�.4`�c4-4-t/4/�/t`t`�`4,4a�.4c��4'�/�/�`4/�,t`�.t`�-H4-tbtdH4`4,4-ˉ�K�K����\��\�ܚ\[ێ�	�'�`4-t/4.4,4.�c4/t,4c�4`t`�`�-4.4c�4,4,�`�/�-4-t`�-t.t.�.4/t,�,4,�4(4.4,�-N�4.�/�/t`�`4/�.�.4`4`�-t/4,4c�4.�/�`4`4-t.�a�.4c�4`�bt,4`�-t.�c4/t,4c�4/�a�.4`t`�.�,4.4-4/�.�,�/�,�`4-t/4-t/t/t,4c�4-�,4bt.4`�,4/�/�,�-t`4at/t/�`t`�-t.K���\�]�	�$4-4`4-t`I��۝X��	�&�/�/t`�,4.�`�b���\�Έ	�$�`4-t/4c�4`4,4,t/�`�b���YZ�^N�	�'�/x�$�'�`�0��N�8�$�NN�	��]\�^N�	�(t,H0��L�8�$�M��	��[�^N�	�$�`H0��4%�,4.�`4b�`�/�����Έ	�[��Yܘ[I��]�X�N�	�'�/�.�.4`�.4.�,4.�/�/ta4.4-4-t/ta�.4,4.�c4/t/�`t`�.	��Y�Έ	�$�`t-H4/�`4,4,�,4-�,4bt.4bt-t/tbˉ�X�Z�\��	�%4-t.t`t`�,�.4-H4,�.�,4-4-t.�c4a�,�4-�,4/�/�.�/t.4`�c4/�`�,t.�.4a�/tb�-H4.�/�/t`�,4.�`�b�4-4/�4.�/�/4/4-t`4a�-t`t.�/�,�/�4-�,4/�`�`t.�,���K��]�X�N�]N�	�'�/�.�.4`�.4.�,4.�/�/ta4.4-4-t/ta�.4,4.�c4/t/�`t`�.	�[��Έ	�%�-4-t`tc4/�,tb�c�`t/tc�-t`�`tc�4.�,4.�4/�,t`4,4,t,4`�b�,�,4-t`�`tc�4.4/ta4/�`4/4,4a�.4c�4.4-�4a4/�`4/4b�4-�,4/�`4/�`t,4/t,4-�,4/�.4`tc�����X�Y]N�	�(t/�,t.4`4,4-t/4b�-H4-4,4/t/tb�-I���X�Y��N�	�&4/4c�4`�-t.�-ta4/�/K4ct.�-t.�`�`4/�/t/t,4c�4/�/�a�`�,4-4,4/t/tb�-H4,4,�`�/�/4/�,t.4.�c�4,�b�,t`4,4/t/tb�-H4`�`t.�`�,�.4-�-t.�,4-t/4,4c�4-4,4`�,4/t-t/�,tc�-�,4`�-t.�c4/t/�-H4`t/�/�,tbt-t/t.4-K4c�-�b�.�4`4,4`ta�dt`�4/t/�/4-t`4-�,4/�`4/�`t,4.4-�,4/�.4`tc4`t/�,�.�,4`t.4cˉ��\���U]N�	�)�-t.�c	�\���P��N�	�%4,4/t/tb�-H4.4`t/�/�.�c4-�`�c�`�`tc�4a�`�/�,tb�4/�a�-t/t.4`�c4`4,4,t/�`�b�4`t,�c�-�,4`�c4`tc�4`H4,�,4/4.4/�`4/�,�-t`4.4`�c4-4/�`t`�`�/�/t/�`t`�c4.4/�/�-4,�/�`�/�,�.4`�c4/�.�/�/ta�,4`�-t.�c4/tb�.H4/�,tb�dt/4.4a�-t/t`ˉ�����\��[��]N�	�(t-t`4,�.4`tb�4/�,t`4,4,t/�`�.�.	����\��[�Л�N�	�$�4`�-t.�`�bt-t/4-4-t/4/�/t`t`�`4,4a�.4/�/t/t/�/4`4-t-�.4/4-H4.4/ta4/�`4/4,4a�.4c�4/�`t`�,4dt`�`tc�4`�/�.�c4.�/�4,�/�4,�`4-t/4-t/t/t/�/4`t/�`t`�/�c�/t.4.4a4/�`4/4b�4.4/t-H4/�`�/�`4,4,�.�c�-t`�`tc�4.4/t-H4`t/�at`4,4/tc�-t`�`tcˈ4'�/�`t.�-H4/t,4/4-t`4-t/t/t/�,�/�4,�.�.�c�a�-t/t.4c�TH�]Y�H4/�,t`4,4,t,4`�b�,�,4-t`�4-�,4/�`4/�`K�\X�\�H4at`4,4/t.4`�4-�,4/�.4`tc4,�\�[�4/�`�/�`4,4,�.�c�-t`�4`�`4,4/t-�,4.�a�.4/�/t/tb�-H4/�.4`tc4/4,�4(�`t`�,4`4-t,�b4.4.H4`4-t-�.4/����H�ܛ\�4/�`t`�,4dt`�`tc�4,�b�.�.�c�a�-t/t/tb�/���Y�[]N�	�'�`4,4,�/�,�/�-H4/�`t/t/�,�,4/t.4-I�Y�[��N�	�'�`4-t-4/�/�.�,4,�,4-t/4/�-H4/�`t/t/�,�,4/t.4-H8�%4-4-t.t`t`�,�.4c�4/�/�4,�,4b4-t/4`�4-�,4/�`4/�`t`�4-4/�4-�,4.�.�c�a�-t/t.4c�4-4/�,�/�,�/�`4,4/t,4`�`t.�`�,�.4,4`�,4.�-�-H4`t/�,�.�,4`t.4-K4.�/�,�-4,4/�/t/�4`�`4-t,t`�-t`�`tcˈ4$�.�,4-4-t.�-ta�4-4/�.�-�-t/H4/�/�-4`�,�-t`4-4.4`�c4/�.�/�/ta�,4`�-t.�c4/t/�-H4/�`t/t/�,�,4/t.4-H4-4/�4-�,4/�`�`t.�,����][�[ە]N�	�)t`4,4/t-t/t.4-I��][�[ې��N�	�'�.�,4/t.4`4`�-t/4b�.H4`t`4/�.�4at`4,4/t-t/t.4cΈܙ][�[۟K�4$�.�,4-4-t.�-ta�4-4/�.�-�-t/H4/�/�`4-t-4-t.�.4`�c4.4/�`4.4/4-t/tc�`�c4/�.�/�/ta�,4`�-t.�c4/tb�.H4`t`4/�.�4-4/�4-�,4/�`�`t.�,����Y��]N�	�(�-4,4.�-t/t.4-H4.4-�,4/�`4/�`tb�4/�4-4,4/t/tb�aI��Y�Л�N�	�%4.�c�4-�,4/�`4/�`t,4-4/�`t`�`�/�,4.4`t/�`4,4,�.�-t/t.4c�4.4.�.4`�-4,4.�-t/t.4c�4`t,�c�-�.4`�-t`tc4`H��۝X�K�4&�/�/t`�,4.�`�4/t-t/�,tat/�-4.4/4/�4/t,4`t`�`4/�.4`�c4-4/�4.�/�/4/4-t`4a�-t`t.�/�,�/�4-�,4/�`�`t.�,����]\�]N�	�(t`�,4`�`�`H4-�,4/�.4`t.	��]\Л�N�	�'�`�/�`4,4,�.�,4a4/�`4/4b�4`t/�-�-4,4dt`�4`�/�.�c4.�/�4-�,4/�`4/�`K�4'�/t,4/t-H4/�/�-4`�,�-t`4-�-4,4-t`�4,4,�`�/�/4,4`�.4a�-t`t.�.4-4,4`�`�4`�`t.�`�,�`�4.4.�.4a�-t/t`ˉ���۝��\��	�'�/�-t`4,4`�/�`4-4,4/t/tb�aN���۝��\�I��\��[ێ�	�$�-t`4`t.4c�4`t/�,�.�,4`t.4cΈݙ\��[۟I��ۙ\�X�[ێ�	�'�,tc�-�,4`�-t.�c4/t/�4-4/�4-�,4/�`�`t.�,�4`�.�,4-�.4`�-H4/�/�-t`4,4`�/�`4,4.�/�/t`�,4.�`�4/�/�4.�/�/ta4.4-4-t/ta�.4,4.�c4/t/�`t`�.4.4`t`4/�.�4at`4,4/t-t/t.4c�4,�4a�-t/t`�`4,4.�c4/t/�.H4.�/�/ta4.4,�`�`4,4a�.4.4`t,4.t`�,�����N�	�%�,4.�`4b�`�c4/�/�.�.4`�.4.�`�4.�/�/ta4.4-4-t/ta�.4,4.�c4/t/�`t`�.	��K�B��^ܝ�ۜ��[��][ۜ�H�[���HB�^ܝ\H[��XY�HH�^[و\[و�[��][ۜ�^ܝ�ۜ�[��XY�SX�[Έ�X�ܙ[��XY�K��[�ψH[��	�S�����	�����N�	ԕI��B
+    rightsBody: 'To request access, correction or deletion, contact {contact}. This contact must be configured before commercial launch.',
+    statusTitle: 'Booking status',
+    statusBody: 'Submitting this form creates only a booking request. It does not automatically confirm a date, service or price.',
+    controller: 'Data controller: {controller}',
+    version: 'Consent policy version: {version}',
+    ownerAction: 'Required before launch: add the controller identity, privacy contact and retention period in the central site configuration.',
+    close: 'Close privacy policy',
+  },
+}
+
+const lv: typeof en = {
+  locale: 'lv-LV',
+  meta: {
+    title: 'VELORA Detail Lab | Premium auto kopšana Rīgā',
+    description: 'Premium auto kopšana, virsbūves pulēšana, keramiskais pārklājums un aizsargplēves uzstādīšana Rīgā.',
+  },
+  common: { skip: 'Pāriet uz saturu', from: 'no', close: 'Aizvērt' },
+  header: {
+    navLabel: 'Galvenā navigācija', menuOpen: 'Atvērt izvēlni', menuClose: 'Aizvērt izvēlni', language: 'Valoda', book: 'Pieteikt vizīti',
+    nav: { services: 'Pakalpojumi', results: 'Rezultāti', process: 'Process', pricing: 'Cenas', faq: 'BUJ' },
+  },
+  hero: {
+    eyebrow: 'Auto kopšanas studija · Rīga',
+    title: 'Precizitāte, ko redz. Aizsardzība, kam uzticas.',
+    body: 'Premium kopšana, virsbūves korekcija un ilgtermiņa aizsardzība auto, kas pelnījis vairāk par ātru mazgāšanu.',
+    primary: 'Aprēķināt cenu', secondary: 'Apskatīt darbus', highlights: ['Kopšana', 'Korekcija', 'Aizsardzība'], scroll: 'Ritiniet tālāk',
+  },
+  servicesSection: {
+    eyebrow: 'Pakalpojumi', title: 'Piemērota apstrāde ar skaidru mērķi.',
+    body: 'Katru darbu sākam ar auto stāvokli, nevis gatavu kontrolsarakstu. Izvēlieties sākumpunktu, un pēc apskates precizēsim plānu.',
+    add: 'Pievienot tāmei', added: 'Pievienots tāmei', duration: 'Aptuvenais laiks',
+  },
+  serviceNames: {
+    exterior: 'Signature virsbūve', interior: 'Salona atjaunošana', correction: 'Virsbūves korekcija', ceramic: 'Keramiskā aizsardzība', ppfFront: 'Virsbūves aizsargplēve', ppfFull: 'Pilna virsbūves aizsargplēve', maintenance: 'Uzturošā kopšana',
+  },
+  serviceDescriptions: {
+    exterior: 'Droša, rūpīga virsbūves mazgāšana, attīrīšana un kvalitatīva manuālā apdare.',
+    interior: 'Padziļināta ādas, tekstila, plastmasas un ikdienā visvairāk skarto detaļu tīrīšana.',
+    correction: 'Kontrolēta pulēšana, kas samazina skrāpējumus, miglojumu un vieglus defektus, saudzējot lakas slāni.',
+    ceramic: 'Noturīga keramiskā aizsardzība vieglākai kopšanai un izteiktākam krāsas dziļumam.',
+    ppfFront: 'Precīzi piegriezta caurspīdīga plēve priekšējām zonām, ko visvairāk skar akmentiņi un ceļa nodilums.',
+    ppfFull: 'Pilns caurspīdīgas aizsargplēves pārklājums visaptverošai virsbūves aizsardzībai.',
+    maintenance: 'Rūpīga atkārtota kopšana, kas saglabā jau izveidoto apdari un aizsardzību.',
+  },
+  serviceDurations: {
+    exterior: '1,5–2 h', interior: '4–6 h', correction: '6–10 h', ceramic: '1–2 dienas', ppfFront: '1–2 dienas', ppfFull: '3–5 dienas', maintenance: '2–3 h',
+  },
+  estimator: {
+    eyebrow: 'Cenas kalkulators', title: 'Izveidojiet saprotamu sākotnējo tāmi.',
+    body: 'Izvēlieties auto un nepieciešamos darbus. Redzēsiet katra pakalpojuma bāzes cenu, izmēra koeficientu un reālistisku laika prognozi.',
+    vehicleTitle: '1. Auto veids', servicesTitle: '2. Izvēlieties pakalpojumus', summaryTitle: 'Jūsu tāme',
+    vehicles: { compact: 'Kompakts', sedan: 'Sedans', suv: 'SUV', large: 'Liels SUV / furgons' },
+    vehicleExample: { compact: 'piem., VW Golf', sedan: 'piem., BMW 5. sērija', suv: 'piem., Volvo XC60', large: 'piem., Audi Q7 / furgons' },
+    base: 'Bāzes cena', sizeAdjustment: 'Auto koeficients', remove: 'Noņemt', empty: 'Izvēlieties vienu vai vairākus pakalpojumus, lai redzētu tāmi.',
+    subtotal: 'Pakalpojumu bāze', formula: 'Pakalpojumu bāze × {multiplier} auto koeficients', estimatedTotal: 'Aptuvenā summa', workingTime: 'Aptuvenais darba laiks', hours: 'apmēram {hours} h', days: 'apmēram {days} darba dienas',
+    disclaimer: 'Galīgo cenu apstiprinām pēc auto apskates un darba apjoma saskaņošanas.', continue: 'Turpināt pieteikumu',
+  },
+  results: {
+    eyebrow: 'Izmērāms rezultāts', title: 'Uzlabojums, nevis maskēšana.',
+    body: 'Velciet attēla dalījumu, lai salīdzinātu sākotnējo stāvokli ar rezultātu pēc attīrīšanas, korekcijas un pārbaudes.',
+    before: 'Pirms', after: 'Pēc', beforeAlt: 'Tumša kupeja ar ceļa nosēdumiem un blāvu krāsu pirms kopšanas', afterAlt: 'Tas pats tumšais kupejas auto ar tīru, atstarojošu apdari pēc kopšanas', slider: 'Mainīt salīdzinājumu pirms un pēc',
+  },
+  gallery: {
+    eyebrow: 'Izvēlēti darbi', title: 'Par kvalitāti stāsta detaļas.', body: 'Tuvāks skats uz virsmām, materiāliem un procesiem, ar kuriem strādājam ik dienu.',
+    filters: { all: 'Visi', exterior: 'Virsbūve', interior: 'Salons', protection: 'Aizsardzība' }, filterLabel: 'Filtrēt darbu galeriju',
+    open: 'Atvērt attēlu: {title}', close: 'Aizvērt attēlu skatītāju', previous: 'Iepriekšējais attēls', next: 'Nākamais attēls', counter: '{current} no {total}',
+    titles: {
+      correction: 'Virsbūves korekcijas noslēdzošā pulēšana', interior: 'Koptas ādas un konsoles virsmas', ceramic: 'Keramiskais pārklājums paneli pa panelim', ppf: 'Priekšējā spārna aizsargplēves uzstādīšana', wheel: 'Diska un bremžu zonas kopšana', finish: 'Noslēguma pārbaude studijas apgaismojumā',
+    },
+    alts: {
+      correction: 'Meistars ar pulēšanas iekārtu apstrādā grafīta krāsas auto pārsegu', interior: 'Tīrs melnas ādas auto salons, ko kopj ar smalku birstīti', ceramic: 'Keramiskā pārklājuma aplikators uz tumšas metāliskas auto krāsas', ppf: 'Caurspīdīgas aizsargplēves uzstādīšana uz grafīta krāsas priekšējā spārna', wheel: 'Melns vieglmetāla disks un vara krāsas bremžu suports, ko tīra ar mīkstu birsti', finish: 'Nevainojams tumšs kupejas auto detalizēšanas studijā no aizmugures',
+    },
+  },
+  process: {
+    eyebrow: 'Kā mēs strādājam', title: 'Rūpīgs process neatstāj vietu minējumiem.',
+    body: 'Fiksējam sākotnējo stāvokli, izvēlamies saudzīgāko efektīvo metodi un pārbaudām rezultātu godīgā inspekcijas apgaismojumā.',
+    steps: {
+      assessment: { title: 'Auto novērtēšana', body: 'Kopā apskatām krāsu, apdari un salona materiālus, pēc tam saskaņojam prioritātes, riskus un gala apjomu.' },
+      preparation: { title: 'Virsmas sagatavošana', body: 'Droša mazgāšana un ķīmiska, mehāniska attīrīšana izveido tīru un stabilu pamatu turpmākajam darbam.' },
+      detail: { title: 'Kopšana un aizsardzība', body: 'Saskaņoto korekciju, tīrīšanu vai aizsardzību veicam metodiski — paneli pa panelim.' },
+      inspection: { title: 'Noslēguma kvalitātes pārbaude', body: 'Pārbaudām apdari fokusētā gaismā, izskaidrojam kopšanu un kopā apskatām pabeigto auto.' },
+    },
+  },
+  pricing: {
+    eyebrow: 'Komplekti', title: 'Skaidri sākumpunkti. Pielāgoti pēc apskates.', body: 'Komplekti apvieno biežāk izvēlētos darbus. Mēs nepievienosim apstrādi, kas jūsu auto nav vajadzīga.', popular: 'Bieža izvēle', choose: 'Izvēlēties {name}',
+    packages: {
+      essential: { name: 'Essential', description: 'Regulārai profesionālai kopšanai.', items: ['Droša virsbūves mazgāšana un kopšana', 'Diski, riepas un durvju ailes', 'Salona sūkšana un virsmu kopšana', 'Ar roku uzklāta aizsardzība'] },
+      restore: { name: 'Restore', description: 'Padziļinātai tīrīšanai un krāsas uzlabošanai.', items: ['Virsbūves attīrīšana', 'Padziļināta salona tīrīšana', 'Viena posma krāsas uzlabošana', 'Trīs mēnešu virsmas aizsardzība'] },
+      protect: { name: 'Protect', description: 'Korekcijai un ilgtermiņa virsmas aizsardzībai.', items: ['Krāsas attīrīšana', 'Kontrolēta virsbūves korekcija', 'Keramiskā pārklājuma uzklāšana', 'Cietēšana un kopšanas konsultācija'] },
+    },
+  },
+  faq: {
+    eyebrow: 'Atbildes uz jautājumiem', title: 'Noderīgi pirms vizītes.',
+    items: {
+      duration: { q: 'Cik ilgi ilgst auto kopšana?', a: 'Uzturošā kopšana var aizņemt divas līdz trīs stundas. Padziļināta salona tīrīšana, krāsas korekcija un pārklājumi var prasīt vienu vai vairākas darba dienas. Sākotnējo laiku redzēsiet tāmē, bet to apstiprinām pēc apskates.' },
+      prepare: { q: 'Vai auto iepriekš jāsagatavo?', a: 'Lūdzam izņemt vērtīgas un personīgas lietas no salona un bagāžnieka. Auto pirms ierašanās nav jāmazgā — mēs vēlamies to novērtēt un iztīrīt pēc sava procesa.' },
+      ceramic: { q: 'Cik ilgi kalpo keramiskais pārklājums?', a: 'Noturība atkarīga no pārklājuma sistēmas, nobraukuma, glabāšanas un mazgāšanas paradumiem. Ieteiksim auto lietošanai piemērotu risinājumu un izskaidrosim vajadzīgo kopšanu.' },
+      scratches: { q: 'Vai skrāpējumus var noņemt pilnībā?', a: 'Daudzus vieglus defektus var droši samazināt vai noņemt, bet dziļi skrāpējumi var būt zem lakas slāņa. Mēs saudzējam krāsu un neturpinām korekciju, ja tā prasītu noņemt pārāk daudz materiāla.' },
+      finalPrice: { q: 'Vai aprēķinātā cena ir galīga?', a: 'Nē. Kalkulators ir saprotams sākumpunkts, ko veido auto izmērs un izvēlētie pakalpojumi. Gala cenu apstiprinām pēc auto stāvokļa apskates un apjoma saskaņošanas.' },
+      location: { q: 'Kur atrodas studija?', a: 'Studija atrodas Rīgā. Šajā demonstrācijas vietnē redzamā precīzā adrese ir vietturis, kas pirms palaišanas jāaizstāj ar apstiprināto atrašanās vietu.' },
+      cancel: { q: 'Kas notiek, ja vizīte jāatceļ?', a: 'Lūdzu, paziņojiet pēc iespējas agrāk, lai studijas laiku varam piedāvāt citam klientam. Gala atcelšanas noteikumi jāapstiprina, pievienojot produkcijas pieteikumu politiku.' },
+    },
+  },
+  booking: {
+    eyebrow: 'Vizītes pieteikums', demoEyebrow: 'Pieteikuma demonstrācija', title: 'Pastāstiet par savu auto.',
+    body: 'Nosūtiet vizītes pieteikumu izskatīšanai. Tas paliek gaidīšanas statusā, līdz atsevišķi apstiprinām pieejamību, darbu apjomu un cenu.',
+    demoBody: 'Aizpildiet veidlapu, lai apskatītu validāciju, cenu aprēķinu un pieteikuma kopsavilkumu. Informāciju nesaņem neviens uzņēmums.',
+    pendingNotice: 'Šī veidlapa nosūta pieteikumu, nevis apstiprinātu rezervāciju. Gala apstiprinājums tiks nosūtīts atsevišķi pa tālruni vai e-pastu.',
+    demoNotice: 'Šī demonstrācija darbojas tikai pašreizējā pārlūka lapā un nesazinās ar auto kopšanas studiju.',
+    demoWarning: 'Portfolio demonstrācija. Šeit ievadītā informācija netiek nosūtīta vai saglabāta.',
+    name: 'Vārds, uzvārds', phone: 'Tālruņa numurs', email: 'E-pasta adrese', vehicle: 'Auto marka un modelis', services: 'Izvēlētie pakalpojumi', date: 'Vēlamais datums', message: 'Papildu ziņa', consent: 'Piekrītu, ka VELORA izmanto šos datus, lai atbildētu uz manu pieteikumu.', demoConsent: 'Saprotu, ka šī ir portfolio demonstrācija un informācija netiek nosūtīta vai saglabāta.', optional: 'Nav obligāti',
+    placeholders: { name: 'Jūsu vārds', phone: 'Norādiet valsts kodu', email: 'vards@domens.lv', vehicle: 'piem., Volvo XC60', message: 'Aprakstiet auto stāvokli vai svarīgāko rezultātu.' },
+    estimateLabel: 'Klienta ierīcē aprēķināta tāme', estimateVehicle: 'Auto kategorija', estimatePrice: 'Aptuvenā cena', estimateDuration: 'Aptuvenais ilgums', clientEstimate: 'Aprēķins klienta ierīcē; gala vērtības apstiprinām pēc apskates', pricingVersion: 'Cenu versija',
+    submit: 'Nosūtīt pieteikumu', submitting: 'Nosūtām pieteikumu…', demoSubmit: 'Priekšskatīt pieteikumu', demoSubmitting: 'Gatavojam demonstrāciju…', demoSuccess: 'Portfolio demonstrācija pabeigta.', demoNoReservation: 'Īsta rezervācija netika izveidota.', demoNoTransmission: 'Informācija netika nosūtīta vai saglabāta.', demoServices: 'Izvēlētie pakalpojumi', attempted: 'Pārlūks mēģināja nosūtīt vizītes pieteikumu.', attemptedDetail: 'Google Forms šai vietnei nesniedz pārbaudāmu atbildi. Pieteikums ir gaidīšanas statusā, līdz VELORA ar jums sazinās atsevišķi.', reference: 'Pieteikuma atsauce', referenceNotice: 'Saglabājiet šo atsauci saziņai. Tā nav pierādījums, ka pieteikums ir saglabāts vai pieņemts.', fallback: 'Nosūtīt to pašu pieteikumu e-pastā', fallbackUnavailable: 'Rezerves saziņas veids vēl nav konfigurēts.',
+    errors: { name: 'Ievadiet vārdu un uzvārdu.', nameTooLong: 'Izmantojiet ne vairāk kā 100 rakstzīmes.', phone: 'Ievadiet derīgu tālruņa numuru.', phoneTooLong: 'Izmantojiet ne vairāk kā 32 rakstzīmes.', email: 'Ievadiet derīgu e-pasta adresi.', emailTooLong: 'Izmantojiet ne vairāk kā 254 rakstzīmes.', vehicle: 'Ievadiet auto marku un modeli.', vehicleTooLong: 'Izmantojiet ne vairāk kā 120 rakstzīmes.', services: 'Izvēlieties vismaz vienu pakalpojumu.', unknownService: 'Viens vai vairāki pakalpojumi nav atpazīti.', date: 'Izvēlieties šodienu vai vēlāku datumu.', messageTooLong: 'Izmantojiet ne vairāk kā 1500 rakstzīmes.', consent: 'Piekrišana ir vajadzīga, lai varam atbildēt.', demoConsent: 'Apstipriniet, ka saprotat: šī ir demonstrācija.', duplicate: 'Šo pieteikumu pārlūks jau mēģināja nosūtīt. Pirms atkārtotas nosūtīšanas mainiet informāciju.', demoDuplicate: 'Šī demonstrācija jau ir pabeigta. Pirms atkārtošanas mainiet kādu informāciju.', generic: 'Pārlūks nevarēja mēģināt nosūtīt pieteikumu.', demoGeneric: 'Demonstrāciju nevarēja sagatavot. Lūdzu, mēģiniet vēlreiz.' },
+  },
+  footer: {
+    description: 'Premium auto kopšanas studija Rīgā, kas koncentrējas uz kontrolētu korekciju, rūpīgu tīrīšanu un noturīgu virsmu aizsardzību.', visit: 'Apmeklējums', contact: 'Kontakti', hours: 'Darba laiks', weekday: 'P.–Pk. · 09:00–19:00', saturday: 'S. · 10:00–16:00', sunday: 'Sv. · Slēgts', follow: 'Sekot Instagram', privacy: 'Privātuma politika', rights: 'Visas tiesības aizsargātas.', placeholder: 'Īpašnieka darbība: pirms komerciālas palaišanas aizpildiet publisko kontaktinformāciju.',
+  },
+  privacy: {
+    title: 'Privātuma politika', intro: 'Šajā paziņojumā paskaidrots, kā tiek apstrādāta vizītes pieteikuma veidlapā iesniegtā informācija.',
+    collectedTitle: 'Apkopotie dati', collectedBody: 'Vārds, tālrunis, e-pasts, auto dati, izvēlētie pakalpojumi, vēlamais datums, izvēles ziņa, valoda, tāmes dati, pieteikuma atsauce un piekrišanas ieraksts.',
+    purposeTitle: 'Mērķis', purposeBody: 'Dati tiek izmantoti, lai izvērtētu pieprasītos darbus, sazinātos ar jums, pārbaudītu pieejamību un sagatavotu gala apjomu un cenu.',
+    processingTitle: 'Apstrādes pakalpojumi', processingBody: 'Pašreizējā demonstrācijas režīmā informācija paliek tikai veidlapas pagaidu stāvoklī un netiek nosūtīta vai saglabāta. Kad API režīms tiek apzināti ieslēgts, Netlify apstrādā pieprasījumu, Supabase glabā rezervāciju, bet Resend nosūta darījumu e-pastus. Novecojušais Google Forms režīms paliek izslēgts.',
+    legalTitle: 'Tiesiskais pamats', legalBody: 'Paredzētais pamats ir darbības pēc jūsu pieprasījuma pirms pakalpojuma līguma noslēgšanas, kā arī piekrišana, ja tā nepieciešama. Īpašniekam pirms palaišanas jāapstiprina gala tiesiskais pamats.',
+    retentionTitle: 'Glabāšana', retentionBody: 'Plānotais glabāšanas termiņš: {retention}. Īpašniekam pirms palaišanas jānosaka un jāievēro gala glabāšanas grafiks.',
+    rightsTitle: 'Dzēšanas un privātuma pieprasījumi', rightsBody: 'Lai pieprasītu piekļuvi, labošanu vai dzēšanu, sazinieties ar {contact}. Šis kontakts jākonfigurē pirms komerciālas palaišanas.',
+    statusTitle: 'Rezervācijas statuss', statusBody: 'Veidlapas iesniegšana rada tikai vizītes pieteikumu. Tā automātiski neapstiprina datumu, pakalpojumu vai cenu.',
+    controller: 'Datu pārzinis: {controller}', version: 'Piekrišanas politikas versija: {version}', ownerAction: 'Pirms palaišanas obligāti: centrālajā vietnes konfigurācijā norādiet pārzini, privātuma kontaktu un glabāšanas termiņu.', close: 'Aizvērt privātuma politiku',
+  },
+}
+
+const ru: typeof en = {
+  locale: 'ru-LV',
+  meta: {
+    title: 'VELORA Detail Lab | Премиальный детейлинг в Риге',
+    description: 'Премиальный детейлинг, коррекция лакокрасочного покрытия, керамика и защитная плёнка в Риге.',
+  },
+  common: { skip: 'Перейти к содержимому', from: 'от', close: 'Закрыть' },
+  header: {
+    navLabel: 'Основная навигация', menuOpen: 'Открыть меню', menuClose: 'Закрыть меню', language: 'Язык', book: 'Записаться',
+    nav: { services: 'Услуги', results: 'Результаты', process: 'Процесс', pricing: 'Цены', faq: 'Вопросы' },
+  },
+  hero: {
+    eyebrow: 'Студия автодетейлинга · Рига', title: 'Точность, которую видно. Защита, которой доверяют.',
+    body: 'Премиальный детейлинг, коррекция покрытия и долговременная защита для автомобилей, которым недостаточно быстрой мойки.',
+    primary: 'Рассчитать цену', secondary: 'Посмотреть работы', highlights: ['Детейлинг', 'Коррекция', 'Защита'], scroll: 'Листайте дальше',
+  },
+  servicesSection: {
+    eyebrow: 'Услуги', title: 'Подходящая обработка с ясной целью.', body: 'Каждая услуга начинается с состояния автомобиля, а не с готового чек-листа. Выберите отправную точку — после осмотра мы уточним план.', add: 'Добавить в расчёт', added: 'Добавлено в расчёт', duration: 'Примерное время',
+  },
+  serviceNames: {
+    exterior: 'Signature Exterior', interior: 'Восстановление салона', correction: 'Коррекция покрытия', ceramic: 'Керамическая защита', ppfFront: 'Защитная плёнка', ppfFull: 'Полная оклейка защитной плёнкой', maintenance: 'Поддерживающий уход',
+  },
+  serviceDescriptions: {
+    exterior: 'Безопасная тщательная очистка кузова, деконтаминация и аккуратная ручная финишная обработка.',
+    interior: 'Глубокая очистка кожи, текстиля, пластика и деталей, на которых особенно заметна ежедневная эксплуатация.',
+    correction: 'Контролируемая машинная полировка для уменьшения круговых рисок, помутнения и лёгких дефектов с сохранением лака.',
+    ceramic: 'Стойкая керамическая защита, упрощающая уход и сохраняющая глубину блеска.',
+    ppfFront: 'Точно подогнанная прозрачная плёнка для передних зон, наиболее уязвимых к сколам и дорожному износу.',
+    ppfFull: 'Полное покрытие кузова прозрачной плёнкой для комплексной защиты от ударов и повреждений поверхности.',
+    maintenance: 'Тщательный повторный уход, сохраняющий уже созданный финиш и защиту автомобиля.',
+  },
+  serviceDurations: {
+    exterior: '1,5–2 ч', interior: '4–6 ч', correction: '6–10 ч', ceramic: '1–2 дня', ppfFront: '1–2 дня', ppfFull: '3–5 дней', maintenance: '2–3 ч',
+  },
+  estimator: {
+    eyebrow: 'Калькулятор цены', title: 'Составьте понятный предварительный расчёт.', body: 'Выберите автомобиль и нужные работы. Вы увидите базовую цену каждой услуги, поправку на размер и реалистичную оценку времени.', vehicleTitle: '1. Тип автомобиля', servicesTitle: '2. Выберите услуги', summaryTitle: 'Ваш расчёт',
+    vehicles: { compact: 'Компакт', sedan: 'Седан', suv: 'SUV', large: 'Большой SUV / фургон' },
+    vehicleExample: { compact: 'например, VW Golf', sedan: 'например, BMW 5 серии', suv: 'например, Volvo XC60', large: 'например, Audi Q7 / фургон' },
+    base: 'База', sizeAdjustment: 'Коэффициент авто', remove: 'Убрать', empty: 'Выберите одну или несколько услуг, чтобы увидеть расчёт.', subtotal: 'Базовые услуги', formula: 'Базовые услуги × {multiplier} коэффициент авто', estimatedTotal: 'Ориентировочная сумма', workingTime: 'Ориентировочное время работы', hours: 'около {hours} ч', days: 'около {days} рабочих дней', disclaimer: 'Окончательную цену подтверждаем после осмотра автомобиля и согласования объёма работ.', continue: 'Перейти к записи',
+  },
+  results: {
+    eyebrow: 'Измеримый результат', title: 'Улучшение, а не маскировка.', body: 'Перемещайте границу, чтобы сравнить исходное состояние с результатом после очистки, коррекции и проверки.', before: 'До', after: 'После', beforeAlt: 'Тёмное купе с дорожным налётом и тусклым блеском до детейлинга', afterAlt: 'То же тёмное купе с чистым отражающим покрытием после детейлинга', slider: 'Настроить сравнение до и после',
+  },
+  gallery: {
+    eyebrow: 'Избранные работы', title: 'О качестве говорят детали.', body: 'Ближе к поверхностям, материалам и процессам, с которыми мы работаем каждый день.', filters: { all: 'Все', exterior: 'Кузов', interior: 'Салон', protection: 'Защита' }, filterLabel: 'Фильтр галереи работ', open: 'Открыть изображение: {title}', close: 'Закрыть просмотр', previous: 'Предыдущее изображение', next: 'Следующее изображение', counter: '{current} из {total}',
+    titles: {
+      correction: 'Финишный проход при коррекции покрытия', interior: 'Детальная обработка кожи и консоли', ceramic: 'Нанесение керамики панель за панелью', ppf: 'Установка защитной плёнки на переднее крыло', wheel: 'Детейлинг диска и тормозной зоны', finish: 'Финальная проверка при студийном освещении',
+    },
+    alts: {
+      correction: 'Мастер в перчатках полирует капот графитового автомобиля при студийном свете', interior: 'Чистый салон из чёрной кожи обрабатывают тонкой кистью', ceramic: 'Аппликатор керамического покрытия на тёмной краске металлик', ppf: 'Прозрачную защитную плёнку устанавливают на графитовое переднее крыло', wheel: 'Чёрный легкосплавный диск и медный тормозной суппорт очищают мягкой кистью', finish: 'Чистое тёмное купе сзади в студии детейлинга',
+    },
+  },
+  process: {
+    eyebrow: 'Как мы работаем', title: 'Тщательный процесс исключает догадки.', body: 'Фиксируем исходное состояние, выбираем наиболее щадящий эффективный метод и проверяем результат при честном инспекционном свете.',
+    steps: {
+      assessment: { title: 'Оценка автомобиля', body: 'Вместе осматриваем краску, отделку и материалы салона, затем согласовываем приоритеты, риски и окончательный объём.' },
+      preparation: { title: 'Подготовка поверхности', body: 'Безопасная мойка, химическая и механическая деконтаминация создают чистую стабильную основу для дальнейшей работы.' },
+      detail: { title: 'Детейлинг и защита', body: 'Согласованную коррекцию, очистку или защиту выполняем методично — панель за панелью.' },
+      inspection: { title: 'Финальная проверка качества', body: 'Проверяем финиш направленным светом, объясняем уход и вместе осматриваем готовый автомобиль.' },
+    },
+  },
+  pricing: {
+    eyebrow: 'Пакеты', title: 'Понятные отправные точки. Уточнение после осмотра.', body: 'Пакеты объединяют работы, которые клиенты выбирают чаще всего. Мы не добавим обработку, которая автомобилю не нужна.', popular: 'Частый выбор', choose: 'Выбрать {name}',
+    packages: {
+      essential: { name: 'Essential', description: 'Для регулярного профессионального ухода.', items: ['Безопасная мойка и детейлинг кузова', 'Диски, шины и дверные проёмы', 'Пылесос и уход за поверхностями салона', 'Ручная финишная защита'] },
+      restore: { name: 'Restore', description: 'Для глубокой очистки и улучшения покрытия.', items: ['Деконтаминация кузова', 'Глубокая очистка салона', 'Одноэтапное улучшение покрытия', 'Защита поверхности на три месяца'] },
+      protect: { name: 'Protect', description: 'Для коррекции и долговременной защиты.', items: ['Деконтаминация краски', 'Контролируемая коррекция покрытия', 'Нанесение керамики', 'Выдержка и консультация по уходу'] },
+    },
+  },
+  faq: {
+    eyebrow: 'Ответы на вопросы', title: 'Полезно знать до визита.',
+    items: {
+      duration: { q: 'Сколько времени занимает детейлинг?', a: 'Поддерживающий детейлинг может занять два-три часа. Глубокая очистка салона, коррекция и покрытия требуют от одного до нескольких рабочих дней. Предварительный срок появится в расчёте, а подтвердим его после осмотра.' },
+      prepare: { q: 'Нужно ли подготовить автомобиль?', a: 'Пожалуйста, уберите ценные и личные вещи из салона и багажника. Мыть машину перед приездом не нужно — мы предпочитаем оценить и очистить её по своему процессу.' },
+      ceramic: { q: 'Сколько служит керамическое покрытие?', a: 'Срок зависит от системы покрытия, пробега, хранения и привычек мойки. Мы предложим вариант под эксплуатацию автомобиля и объясним необходимый уход.' },
+      scratches: { q: 'Можно ли полностью убрать царапины?', a: 'Многие лёгкие дефекты можно безопасно уменьшить или удалить, но глубокие царапины могут проходить сквозь лак. Мы сохраняем здоровье покрытия и не убираем слишком много материала ради одного дефекта.' },
+      finalPrice: { q: 'Расчётная цена окончательная?', a: 'Нет. Калькулятор — прозрачная отправная точка на основе размера автомобиля и выбранных услуг. Окончательную цену подтверждаем после оценки состояния и согласования объёма.' },
+      location: { q: 'Где находится студия?', a: 'Мы находимся в Риге. Точный адрес на этой демонстрационной странице — заполнитель, который нужно заменить подтверждённым адресом перед запуском.' },
+      cancel: { q: 'Что делать, если нужно отменить запись?', a: 'Сообщите как можно раньше, чтобы мы могли предложить время другому клиенту. Окончательные условия отмены нужно подтвердить при добавлении рабочей политики записи.' },
+    },
+  },
+  booking: {
+    eyebrow: 'Запрос на запись', demoEyebrow: 'Демонстрация записи', title: 'Расскажите об автомобиле.', body: 'Отправьте запрос на рассмотрение. Он остаётся неподтверждённым, пока мы отдельно не согласуем доступность, объём и цену.', demoBody: 'Заполните форму, чтобы увидеть проверку данных, расчёт цены и сводку запроса. Информация не передаётся компании.', pendingNotice: 'Эта форма отправляет запрос, а не подтверждённую запись. Окончательное подтверждение поступит отдельно по телефону или электронной почте.', demoNotice: 'Эта демонстрация работает только на текущей странице браузера и не связывается со студией.', demoWarning: 'Демонстрация для портфолио. Введённые данные не отправляются и не сохраняются.', name: 'Имя и фамилия', phone: 'Номер телефона', email: 'Электронная почта', vehicle: 'Марка и модель автомобиля', services: 'Выбранные услуги', date: 'Желаемая дата', message: 'Дополнительное сообщение', consent: 'Я разрешаю VELORA использовать эти данные, чтобы ответить на мой запрос.', demoConsent: 'Я понимаю, что это демонстрация для портфолио и информация не отправляется и не сохраняется.', optional: 'Необязательно',
+    placeholders: { name: 'Ваше имя', phone: 'Укажите код страны', email: 'имя@домен.lv', vehicle: 'например, Volvo XC60', message: 'Опишите состояние автомобиля или желаемый результат.' },
+    estimateLabel: 'Расчёт на устройстве клиента', estimateVehicle: 'Категория автомобиля', estimatePrice: 'Ориентировочная цена', estimateDuration: 'Ориентировочная длительность', clientEstimate: 'Расчёт на устройстве клиента; окончательные значения подтверждаются после осмотра', pricingVersion: 'Версия цен',
+    submit: 'Отправить запрос', submitting: 'Отправляем запрос…', demoSubmit: 'Предпросмотр запроса', demoSubmitting: 'Подготавливаем демонстрацию…', demoSuccess: 'Демонстрация для портфолио завершена.', demoNoReservation: 'Реальная запись не создавалась.', demoNoTransmission: 'Информация не передавалась и не сохранялась.', demoServices: 'Выбранные услуги', attempted: 'Браузер попытался отправить запрос на запись.', attemptedDetail: 'Google Forms не предоставляет сайту проверяемый ответ. Запрос остаётся неподтверждённым, пока VELORA не свяжется с вами отдельно.', reference: 'Номер запроса', referenceNotice: 'Сохраните номер для связи. Он не доказывает, что запрос сохранён или принят.', fallback: 'Отправить тот же запрос по электронной почте', fallbackUnavailable: 'Резервный контакт ещё не настроен.',
+    errors: { name: 'Введите имя и фамилию.', nameTooLong: 'Используйте не более 100 символов.', phone: 'Введите корректный номер телефона.', phoneTooLong: 'Используйте не более 32 символов.', email: 'Введите корректный адрес почты.', emailTooLong: 'Используйте не более 254 символов.', vehicle: 'Введите марку и модель автомобиля.', vehicleTooLong: 'Используйте не более 120 символов.', services: 'Выберите хотя бы одну услугу.', unknownService: 'Одна или несколько услуг не распознаны.', date: 'Выберите сегодняшнюю или будущую дату.', messageTooLong: 'Используйте не более 1500 символов.', consent: 'Согласие необходимо, чтобы мы могли ответить.', demoConsent: 'Подтвердите, что понимаете: это демонстрация.', duplicate: 'Браузер уже пытался отправить этот запрос. Измените данные перед повторной отправкой.', demoDuplicate: 'Эта демонстрация уже завершена. Измените данные перед повторным запуском.', generic: 'Браузер не смог попытаться отправить запрос.', demoGeneric: 'Не удалось подготовить демонстрацию. Попробуйте ещё раз.' },
+  },
+  footer: {
+    description: 'Премиальная студия автодетейлинга в Риге: контролируемая коррекция, тщательная очистка и долговременная защита поверхностей.', visit: 'Адрес', contact: 'Контакты', hours: 'Время работы', weekday: 'Пн–Пт · 09:00–19:00', saturday: 'Сб · 10:00–16:00', sunday: 'Вс · Закрыто', follow: 'Instagram', privacy: 'Политика конфиденциальности', rights: 'Все права защищены.', placeholder: 'Действие владельца: заполнить публичные контакты до коммерческого запуска.',
+  },
+  privacy: {
+    title: 'Политика конфиденциальности', intro: 'Здесь объясняется, как обрабатывается информация из формы запроса на запись.',
+    collectedTitle: 'Собираемые данные', collectedBody: 'Имя, телефон, электронная почта, данные автомобиля, выбранные услуги, желаемая дата, необязательное сообщение, язык, расчёт, номер запроса и запись согласия.',
+    purposeTitle: 'Цель', purposeBody: 'Данные используются, чтобы оценить работы, связаться с вами, проверить доступность и подготовить окончательный объём и цену.',
+    processingTitle: 'Сервисы обработки', processingBody: 'В текущем демонстрационном режиме информация остаётся только во временном состоянии формы и не отправляется и не сохраняется. После намеренного включения API Netlify обрабатывает запрос, Supabase хранит запись, а Resend отправляет транзакционные письма. Устаревший режим Google Forms остаётся выключенным.',
+    legalTitle: 'Правовое основание', legalBody: 'Предполагаемое основание — действия по вашему запросу до заключения договора на услуги, а также согласие, когда оно требуется. Владелец должен подтвердить окончательное основание до запуска.',
+    retentionTitle: 'Хранение', retentionBody: 'Планируемый срок хранения: {retention}. Владелец должен определить и применять окончательный срок до запуска.',
+    rightsTitle: 'Удаление и запросы о данных', rightsBody: 'Для запроса доступа, исправления или удаления свяжитесь с {contact}. Контакт необходимо настроить до коммерческого запуска.',
+    statusTitle: 'Статус записи', statusBody: 'Отправка формы создаёт только запрос. Она не подтверждает автоматически дату, услугу или цену.',
+    controller: 'Оператор данных: {controller}', version: 'Версия согласия: {version}', ownerAction: 'Обязательно до запуска: укажите оператора, контакт по конфиденциальности и срок хранения в центральной конфигурации сайта.', close: 'Закрыть политику конфиденциальности',
+  },
+}
+
+export const translations = { en, lv, ru }
+export type Language = keyof typeof translations
+
+export const languageLabels: Record<Language, string> = {
+  en: 'EN',
+  lv: 'LV',
+  ru: 'RU',
+}
