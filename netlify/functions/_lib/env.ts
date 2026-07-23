@@ -2,6 +2,7 @@ export type ApprovalMode = 'automatic' | 'manual'
 
 type RuntimeConfig = {
   supabaseUrl: string
+  supabaseAnonKey: string
   serviceRoleKey: string
   publicSiteUrl: string
   approvalMode: ApprovalMode
@@ -40,6 +41,7 @@ export function getRuntimeConfig(): RuntimeConfig {
 
   return {
     supabaseUrl: required('SUPABASE_URL').replace(/\/+$/, ''),
+    supabaseAnonKey: required('SUPABASE_ANON_KEY'),
     serviceRoleKey: required('SUPABASE_SERVICE_ROLE_KEY'),
     publicSiteUrl: required('PUBLIC_SITE_URL').replace(/\/+$/, ''),
     approvalMode: approval,

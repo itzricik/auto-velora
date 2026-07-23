@@ -27,6 +27,21 @@
   status = 200
 
 [[redirects]]
+  from = "/api/admin-bookings"
+  to = "/.netlify/functions/admin-bookings"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin-booking-action"
+  to = "/.netlify/functions/admin-booking-action"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin-blocks"
+  to = "/.netlify/functions/admin-blocks"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
