@@ -11,7 +11,7 @@ import { Faq } from './components/Faq'
 import { Booking } from './components/Booking'
 import { Footer } from './components/Footer'
 import { translations, type Language } from './i18n/translations'
-import type { ServiceId } from './data'
+import type { ServiceId, VehicleId } from './pricing'
 
 function getInitialLanguage(): Language {
   const saved = window.localStorage.getItem('velora-language')
@@ -21,6 +21,7 @@ function getInitialLanguage(): Language {
 export default function App() {
   const [language, setLanguage] = useState<Language>(getInitialLanguage)
   const [selectedServices, setSelectedServices] = useState<ServiceId[]>([])
+  const [vehicle, setVehicle] = useState<VehicleId>('sedan')
   const copy = translations[language]
 
   useEffect(() => {
@@ -63,13 +64,13 @@ export default function App() {
       <main id="main-content">
         <Hero language={language} />
         <Services language={language} selected={selectedServices} onToggle={toggleService} />
-        <Estimator language={language} selected={selectedServices} onToggle={toggleService} onContinue={scrollToBooking} />
+        <Estimator language={language} selected={selectedServices} vehicle={vehicle} onVehicleChange={setVehicle} onToggle={toggleService} onContinue={scrollToBooking} />
         <BeforeAfter language={language} />
         <Gallery language={language} />
         <Process language={language} />
         <Pricing language={language} onChoose={choosePackage} />
         <Faq language={language} />
-        <Booking language={language} estimatorSelections={selectedServices} />
+        <Booking language={language} estimatorSelections={selectedServices} estimatorVehicle={vehicle} />
       </main>
       <Footer language={language} />
       <a className="mobile-sticky-cta" href="#booking">{copy.header.book}</a>

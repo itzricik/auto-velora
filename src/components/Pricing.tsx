@@ -8,12 +8,6 @@ type PricingProps = {
   onChoose: (services: ServiceId[]) => void
 }
 
-const packageServices: Record<(typeof packages)[number]['id'], ServiceId[]> = {
-  essential: ['exterior', 'maintenance'],
-  restore: ['exterior', 'interior', 'correction'],
-  protect: ['correction', 'ceramic'],
-}
-
 export function Pricing({ language, onChoose }: PricingProps) {
   const copy = translations[language]
   const formatPrice = (value: number) => new Intl.NumberFormat(copy.locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
@@ -32,7 +26,7 @@ export function Pricing({ language, onChoose }: PricingProps) {
                 <h3><small>{copy.common.from}</small>{formatPrice(item.price)}</h3>
                 <p className="price-card__description">{packageCopy.description}</p>
                 <ul>{packageCopy.items.map((feature) => <li key={feature}><Check size={16} aria-hidden="true" />{feature}</li>)}</ul>
-                <button type="button" className={item.featured ? 'button button--copper button--full' : 'button button--outline button--full'} onClick={() => onChoose(packageServices[item.id])}>
+                <button type="button" className={item.featured ? 'button button--copper button--full' : 'button button--outline button--full'} onClick={() => onChoose([...item.serviceIds])}>
                   {copy.pricing.choose.replace('{name}', packageCopy.name)}<ArrowUpRight size={18} aria-hidden="true" />
                 </button>
               </article>

@@ -1,24 +1,22 @@
 import { ArrowRight, Check, Clock3, X } from 'lucide-react'
-import { services, vehicleTypes, type ServiceId, type VehicleId } from '../data'
+import { calculateEstimate, services, vehicleTypes, type ServiceId, type VehicleId } from '../pricing'
 import { translations, type Language } from '../i18n/translations'
 import { SectionIntro } from './SectionIntro'
-import { useState } from 'react'
 
 type EstimatorProps = {
   language: Language
   selected: ServiceId[]
+  vehicle: VehicleId
+  onVehicleChange: (vehicle: VehicleId) => void
   onToggle: (service: ServiceId) => void
   onContinue: () => void
 }
 
-export function Estimator({ language, selected, onToggle, onContinue }: EstimatorProps) {
+export function Estimator({ language, selected, vehicle, onVehicleChange, onToggle, onContinue }: EstimatorProps) {
   const copy = translations[language]
-  const [vehicle, setVehicle] = useState<VehicleId>('sedan')
-  const multiplier = vehicleTypes.find((item) => item.id === vehicle)?.multiplier ?? 1
   const selectedItems = services.filter((service) => selected.includes(service.id))
-  const baseTotal = selectedItems.reduce((sum, service) => sum + service.price, 0)
-  const total = Math.round(baseTotal * multiplier)
-  const hours = Math.round(selectedItems.reduce((sum, service) => sum + service.hours, 0) * multiplier * 2) / 2
+  const estimate = calculateEstimate(selected, vehicle)
+  const { multiplier, baseTotal, estimatedTotal: total, estimatedHours: hours } = estimate
   const formatPrice = (value: number) => new Intl.NumberFormat(copy.locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
   const formatMultiplier = new Intl.NumberFormat(copy.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(multiplier)
   const timeLabel = hours > 12
@@ -36,7 +34,7 @@ export function Estimator({ language, selected, onToggle, onContinue }: Estimato
               <div className="vehicle-grid">
                 {vehicleTypes.map((item) => (
                   <label key={item.id} className={vehicle === item.id ? 'is-selected' : ''}>
-                    <input type="radio" name="vehicle-type" value={item.id} checked={vehicle === item.id} onChange={() => setVehicle(item.id)} />
+                    <input type="radio" name="vehicle-type" value={item.id} checked={vehicle === item.id} onChange={() => onVehicleChange(item.id)} />
                     <span className="vehicle-picker__check">{vehicle === item.id && <Check size={14} aria-hidden="true" />}</span>
                     <strong>{copy.estimator.vehicles[item.id]}</strong>
                     <small>{copy.estimator.vehicleExample[item.id]}</small>

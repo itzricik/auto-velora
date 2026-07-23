@@ -1,80 +1,91 @@
 import { Check, LoaderCircle, Send, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { services, type ServiceId } from '../data'
+import { buildGoogleFormsPayload } from '../booking/payload'
+import { generateRequestReference } from '../booking/reference'
+import {
+  BOOKING_LIMITS,
+  buildSubmissionFingerprint,
+  getLocalDate,
+  isDuplicateSubmission,
+  sanitizeBookingValues,
+  validateBooking,
+  type BookingField,
+  type BookingFormValues,
+} from '../booking/validation'
 import { siteConfig } from '../config/site'
 import { translations, type Language } from '../i18n/translations'
+import { calculateEstimate, services, type ServiceId, type VehicleId } from '../pricing'
 import { SectionIntro } from './SectionIntro'
 
 type BookingProps = {
   language: Language
   estimatorSelections: ServiceId[]
+  estimatorVehicle: VehicleId
 }
 
-type FormValues = {
-  name: string
-  phone: string
-  email: string
-  vehicle: string
-  serviceIds: ServiceId[]
-  date: string
-  message: string
-  consent: boolean
+type FormValues = Omit<BookingFormValues, 'serviceIds'> & { serviceIds: ServiceId[] }
+type SubmitStatus = 'idle' | 'loading' | 'attempted' | 'error'
+
+const emptyValues: FormValues = {
+  name: '',
+  phone: '',
+  email: '',
+  vehicle: '',
+  serviceIds: [],
+  date: '',
+  message: '',
+  consent: false,
 }
 
-type FieldKey = keyof FormValues
-type SubmitStatus = 'idle' | 'loading' | 'submitted' | 'error'
-
-function getLocalDate() {
-  const now = new Date()
-  const offset = now.getTimezoneOffset() * 60_000
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10)
-}
-
-export function Booking({ language, estimatorSelections }: BookingProps) {
+export function Booking({ language, estimatorSelections, estimatorVehicle }: BookingProps) {
   const copy = translations[language]
-  const [values, setValues] = useState<FormValues>({ name: '', phone: '', email: '', vehicle: '', serviceIds: [], date: '', message: '', consent: false })
-  const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({})
+  const [values, setValues] = useState<FormValues>(emptyValues)
+  const [touched, setTouched] = useState<Partial<Record<BookingField, boolean>>>({})
   const [status, setStatus] = useState<SubmitStatus>('idle')
   const [statusError, setStatusError] = useState('')
+  const [requestReference, setRequestReference] = useState('')
   const lastSubmission = useRef('')
+  const submissionInFlight = useRef(false)
   const minDate = useMemo(getLocalDate, [])
+  const estimate = useMemo(
+    () => calculateEstimate(values.serviceIds, estimatorVehicle),
+    [estimatorVehicle, values.serviceIds],
+  )
 
   useEffect(() => {
     if (!estimatorSelections.length) return
     setValues((current) => ({ ...current, serviceIds: [...estimatorSelections] }))
   }, [estimatorSelections])
 
-  const errors = useMemo(() => {
-    const phoneDigits = values.phone.replace(/\D/g, '')
-    return {
-      name: values.name.trim().length >= 2 ? '' : copy.booking.errors.name,
-      phone: phoneDigits.length >= 8 ? '' : copy.booking.errors.phone,
-      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email) ? '' : copy.booking.errors.email,
-      vehicle: values.vehicle.trim().length >= 2 ? '' : copy.booking.errors.vehicle,
-      serviceIds: values.serviceIds.length ? '' : copy.booking.errors.services,
-      date: values.date && values.date >= minDate ? '' : copy.booking.errors.date,
-      consent: values.consent ? '' : copy.booking.errors.consent,
-    }
-  }, [copy.booking.errors, minDate, values])
+  const errors = useMemo(() => validateBooking(values, minDate), [minDate, values])
 
-  const updateValue = <K extends FieldKey>(field: K, value: FormValues[K]) => {
+  const updateValue = <K extends keyof FormValues>(field: K, value: FormValues[K]) => {
     setValues((current) => ({ ...current, [field]: value }))
-    if (status !== 'loading') setStatus('idle')
+    if (status !== 'loading') {
+      setStatus('idle')
+      setRequestReference('')
+    }
     setStatusError('')
   }
 
-  const markTouched = (field: FieldKey) => setTouched((current) => ({ ...current, [field]: true }))
+  const markTouched = (field: BookingField) => setTouched((current) => ({ ...current, [field]: true }))
 
   const toggleService = (id: ServiceId) => {
     updateValue('serviceIds', values.serviceIds.includes(id) ? values.serviceIds.filter((item) => item !== id) : [...values.serviceIds, id])
     markTouched('serviceIds')
   }
 
+  const fieldError = (field: BookingField) => {
+    const errorCode = touched[field] ? errors[field] : undefined
+    return errorCode ? copy.booking.errors[errorCode] : ''
+  }
+
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const requiredFields: Array<keyof typeof errors> = ['name', 'phone', 'email', 'vehicle', 'serviceIds', 'date', 'consent']
-    setTouched(requiredFields.reduce((result, field) => ({ ...result, [field]: true }), {}))
-    const firstInvalid = requiredFields.find((field) => Boolean(errors[field]))
+    const fieldOrder: BookingField[] = ['name', 'phone', 'email', 'vehicle', 'serviceIds', 'date', 'message', 'consent']
+    setTouched(fieldOrder.reduce((result, field) => ({ ...result, [field]: true }), {}))
+    const firstInvalid = fieldOrder.find((field) => Boolean(errors[field]))
+
     if (firstInvalid) {
       window.setTimeout(() => {
         const selector = firstInvalid === 'serviceIds'
@@ -87,30 +98,35 @@ export function Booking({ language, estimatorSelections }: BookingProps) {
       return
     }
 
-    const signature = JSON.stringify(values)
-    if (lastSubmission.current === signature) {
+    const fingerprint = buildSubmissionFingerprint(values)
+    if (isDuplicateSubmission(fingerprint, lastSubmission.current, submissionInFlight.current)) {
       setStatus('error')
       setStatusError(copy.booking.errors.duplicate)
       return
     }
 
-    setStatus('loading')
-    const serviceList = values.serviceIds.map((id) => translations.en.serviceNames[id]).join(', ')
-    const [year, month, day] = values.date.split('-')
-    const fields = siteConfig.googleForms.fields
-    const payload = new URLSearchParams({
-      [fields.name]: values.name.trim(),
-      [fields.phone]: values.phone.trim(),
-      [fields.email]: values.email.trim(),
-      [fields.vehicle]: values.vehicle.trim(),
-      [fields.services]: serviceList,
-      [fields.message]: values.message.trim(),
-      [fields.consent]: 'Yes',
-      [fields.language]: language.toUpperCase(),
-      [fields.dateYear]: year,
-      [fields.dateMonth]: month,
-      [fields.dateDay]: day,
+    const cleanValues = sanitizeBookingValues(values)
+    const reference = generateRequestReference()
+    const consentTimestamp = new Date().toISOString()
+    const serviceNames = cleanValues.serviceIds.map((id) => copy.serviceNames[id])
+    const payload = buildGoogleFormsPayload({
+      requestReference: reference,
+      name: cleanValues.name,
+      normalizedPhone: cleanValues.phone,
+      email: cleanValues.email,
+      vehicle: cleanValues.vehicle,
+      serviceIds: cleanValues.serviceIds,
+      serviceNames,
+      vehicleId: estimatorVehicle,
+      selectedDate: cleanValues.date,
+      language,
+      message: cleanValues.message,
+      consentTimestamp,
     })
+
+    submissionInFlight.current = true
+    setRequestReference(reference)
+    setStatus('loading')
 
     try {
       await fetch(siteConfig.googleForms.action, {
@@ -118,44 +134,54 @@ export function Booking({ language, estimatorSelections }: BookingProps) {
         mode: 'no-cors',
         body: payload,
       })
-      lastSubmission.current = signature
-      setStatus('submitted')
+      lastSubmission.current = fingerprint
+      setStatus('attempted')
     } catch {
       setStatus('error')
       setStatusError(copy.booking.errors.generic)
+    } finally {
+      submissionInFlight.current = false
     }
   }
 
-  const fieldError = (field: keyof typeof errors) => touched[field] ? errors[field] : ''
+  const fallbackMailto = siteConfig.bookingEmail
+    ? `mailto:${siteConfig.bookingEmail}?subject=${encodeURIComponent(`${siteConfig.businessName} request ${requestReference || ''}`)}`
+    : null
+
+  const formatPrice = (value: number) => new Intl.NumberFormat(copy.locale, {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value)
 
   return (
     <section className="section booking-section" id="booking">
       <div className="container booking-layout">
         <div className="booking-intro">
           <SectionIntro eyebrow={copy.booking.eyebrow} title={copy.booking.title} body={copy.booking.body} />
-          <div className="booking-trust" data-reveal><ShieldCheck size={22} aria-hidden="true" /><p>{copy.estimator.disclaimer}</p></div>
+          <div className="booking-trust" data-reveal><ShieldCheck size={22} aria-hidden="true" /><p>{copy.booking.pendingNotice}</p></div>
         </div>
 
         <form className="booking-form" noValidate onSubmit={submit} data-reveal>
           <div className="form-grid">
             <div className="field">
               <label htmlFor="booking-name">{copy.booking.name}</label>
-              <input id="booking-name" name="name" type="text" autoComplete="name" value={values.name} placeholder={copy.booking.placeholders.name} onChange={(event) => updateValue('name', event.target.value)} onBlur={() => markTouched('name')} aria-invalid={Boolean(fieldError('name'))} aria-describedby={fieldError('name') ? 'booking-name-error' : undefined} />
+              <input id="booking-name" name="name" type="text" autoComplete="name" maxLength={BOOKING_LIMITS.name} value={values.name} placeholder={copy.booking.placeholders.name} onChange={(event) => updateValue('name', event.target.value)} onBlur={() => markTouched('name')} aria-invalid={Boolean(fieldError('name'))} aria-describedby={fieldError('name') ? 'booking-name-error' : undefined} />
               {fieldError('name') && <span className="field-error" id="booking-name-error">{fieldError('name')}</span>}
             </div>
             <div className="field">
               <label htmlFor="booking-phone">{copy.booking.phone}</label>
-              <input id="booking-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={values.phone} placeholder={copy.booking.placeholders.phone} onChange={(event) => updateValue('phone', event.target.value)} onBlur={() => markTouched('phone')} aria-invalid={Boolean(fieldError('phone'))} aria-describedby={fieldError('phone') ? 'booking-phone-error' : undefined} />
+              <input id="booking-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" maxLength={BOOKING_LIMITS.phone} value={values.phone} placeholder={copy.booking.placeholders.phone} onChange={(event) => updateValue('phone', event.target.value)} onBlur={() => markTouched('phone')} aria-invalid={Boolean(fieldError('phone'))} aria-describedby={fieldError('phone') ? 'booking-phone-error' : undefined} />
               {fieldError('phone') && <span className="field-error" id="booking-phone-error">{fieldError('phone')}</span>}
             </div>
             <div className="field">
               <label htmlFor="booking-email">{copy.booking.email}</label>
-              <input id="booking-email" name="email" type="email" inputMode="email" autoComplete="email" value={values.email} placeholder={copy.booking.placeholders.email} onChange={(event) => updateValue('email', event.target.value)} onBlur={() => markTouched('email')} aria-invalid={Boolean(fieldError('email'))} aria-describedby={fieldError('email') ? 'booking-email-error' : undefined} />
+              <input id="booking-email" name="email" type="email" inputMode="email" autoComplete="email" maxLength={BOOKING_LIMITS.email} value={values.email} placeholder={copy.booking.placeholders.email} onChange={(event) => updateValue('email', event.target.value)} onBlur={() => markTouched('email')} aria-invalid={Boolean(fieldError('email'))} aria-describedby={fieldError('email') ? 'booking-email-error' : undefined} />
               {fieldError('email') && <span className="field-error" id="booking-email-error">{fieldError('email')}</span>}
             </div>
             <div className="field">
               <label htmlFor="booking-vehicle">{copy.booking.vehicle}</label>
-              <input id="booking-vehicle" name="vehicle" type="text" autoComplete="off" value={values.vehicle} placeholder={copy.booking.placeholders.vehicle} onChange={(event) => updateValue('vehicle', event.target.value)} onBlur={() => markTouched('vehicle')} aria-invalid={Boolean(fieldError('vehicle'))} aria-describedby={fieldError('vehicle') ? 'booking-vehicle-error' : undefined} />
+              <input id="booking-vehicle" name="vehicle" type="text" autoComplete="off" maxLength={BOOKING_LIMITS.vehicle} value={values.vehicle} placeholder={copy.booking.placeholders.vehicle} onChange={(event) => updateValue('vehicle', event.target.value)} onBlur={() => markTouched('vehicle')} aria-invalid={Boolean(fieldError('vehicle'))} aria-describedby={fieldError('vehicle') ? 'booking-vehicle-error' : undefined} />
               {fieldError('vehicle') && <span className="field-error" id="booking-vehicle-error">{fieldError('vehicle')}</span>}
             </div>
           </div>
@@ -176,6 +202,15 @@ export function Booking({ language, estimatorSelections }: BookingProps) {
             {fieldError('serviceIds') && <span className="field-error" id="booking-services-error">{fieldError('serviceIds')}</span>}
           </fieldset>
 
+          {values.serviceIds.length > 0 && (
+            <div className="booking-estimate" aria-label={copy.booking.estimateLabel}>
+              <div><span>{copy.booking.estimateVehicle}</span><strong>{copy.estimator.vehicles[estimatorVehicle]} × {estimate.multiplier.toFixed(2)}</strong></div>
+              <div><span>{copy.booking.estimatePrice}</span><strong>{formatPrice(estimate.estimatedTotal)}</strong></div>
+              <div><span>{copy.booking.estimateDuration}</span><strong>{estimate.estimatedHours} h</strong></div>
+              <small>{copy.booking.clientEstimate} · {copy.booking.pricingVersion}: {estimate.pricingVersion}</small>
+            </div>
+          )}
+
           <div className="field">
             <label htmlFor="booking-date">{copy.booking.date}</label>
             <input id="booking-date" name="date" type="date" min={minDate} value={values.date} onChange={(event) => updateValue('date', event.target.value)} onBlur={() => markTouched('date')} aria-invalid={Boolean(fieldError('date'))} aria-describedby={fieldError('date') ? 'booking-date-error' : undefined} />
@@ -184,7 +219,8 @@ export function Booking({ language, estimatorSelections }: BookingProps) {
 
           <div className="field">
             <label htmlFor="booking-message">{copy.booking.message}<small>{copy.booking.optional}</small></label>
-            <textarea id="booking-message" name="message" rows={4} value={values.message} placeholder={copy.booking.placeholders.message} onChange={(event) => updateValue('message', event.target.value)} />
+            <textarea id="booking-message" name="message" rows={4} maxLength={BOOKING_LIMITS.message} value={values.message} placeholder={copy.booking.placeholders.message} onChange={(event) => updateValue('message', event.target.value)} onBlur={() => markTouched('message')} aria-invalid={Boolean(fieldError('message'))} aria-describedby={fieldError('message') ? 'booking-message-error' : undefined} />
+            {fieldError('message') && <span className="field-error" id="booking-message-error">{fieldError('message')}</span>}
           </div>
 
           <label className="consent-field">
@@ -199,8 +235,25 @@ export function Booking({ language, estimatorSelections }: BookingProps) {
           </button>
 
           <div className={`form-status form-status--${status}`} aria-live="polite">
-            {status === 'submitted' && <><strong>{copy.booking.submitted}</strong><span>{copy.booking.submittedDetail}</span></>}
-            {status === 'error' && <strong>{statusError} <a href={`mailto:${siteConfig.bookingEmail}`}>{siteConfig.bookingEmail}</a></strong>}
+            {status === 'attempted' && (
+              <>
+                <strong>{copy.booking.attempted}</strong>
+                <span>{copy.booking.attemptedDetail}</span>
+                <span className="request-reference">{copy.booking.reference}: <b>{requestReference}</b></span>
+                <small>{copy.booking.referenceNotice}</small>
+                {fallbackMailto
+                  ? <a href={fallbackMailto}>{copy.booking.fallback}</a>
+                  : <span>{copy.booking.fallbackUnavailable}</span>}
+              </>
+            )}
+            {status === 'error' && (
+              <strong>
+                {statusError}
+                {fallbackMailto
+                  ? <> <a href={fallbackMailto}>{siteConfig.bookingEmail}</a></>
+                  : <> {copy.booking.fallbackUnavailable}</>}
+              </strong>
+            )}
           </div>
         </form>
       </div>

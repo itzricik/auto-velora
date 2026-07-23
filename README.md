@@ -1,44 +1,146 @@
 # VELORA Detail Lab
 
-Production-ready single-page website for a fictional premium automotive detailing studio in Riga. The build uses React, TypeScript, Vite, Lucide icons and hand-authored CSS with no animation or UI framework.
+Production website for a fictional premium automotive detailing studio in Riga. It uses React, TypeScript, Vite, Lucide icons and hand-authored CSS.
 
-## Run locally
+Production URL: <https://auto-velora.netlify.app/>
+
+## Local setup
+
+Requirements: Node.js 20 or newer and npm.
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Quality checks:
 
 ```bash
-pnpm lint
-pnpm build
-pnpm preview
+npm run lint
+npm run test
+npm run build
+npm run preview
 ```
 
-The output in `dist/` is a static site and can be deployed to Netlify, Vercel, Cloudflare Pages or any static host. Configure the host to serve `index.html` at `/`.
+The production output is generated in `dist/`.
 
-## Before launch
+## Branch workflow
 
-Replace the clearly marked placeholder values in `src/config/site.ts`:
+- `main` is the current production source and must not receive Phase 1 work directly.
+- `professional-upgrade` is based on `main` and contains reviewed stabilization work.
+- `professional-upgrade-backup` permanently preserves the old unrelated branch history.
 
-- booking email
-- phone number
-- Riga studio address
-- Instagram URL
-- canonical production URL
+Develop and validate on `professional-upgrade`. Open a review before merging. Do not force-push or deploy `main` as part of Phase 1.
 
-Update the matching canonical, Open Graph and LocalBusiness values in `index.html`, plus the hostname in `public/robots.txt` and `public/sitemap.xml`. Add the final business privacy policy through the existing privacy modal.
+## Public configuration
 
-## Booking behavior
+All public business and policy values are centralized in `src/config/site.ts`.
 
-After client-side validation, the booking form posts directly to the configured Google Form. Google Forms stores each response in the linked `VELORA Booking Database` spreadsheet. The form action and entry IDs are isolated in `src/config/site.ts`; update them there if the Google Form questions are recreated. A direct email link is shown only when submission fails.
+The following values must be supplied by the business owner before commercial launch:
 
-## Images
+- booking email;
+- phone display value;
+- phone `tel:` value;
+- Riga studio address;
+- Instagram URL;
+- privacy contact;
+- data-controller identity;
+- data-retention period.
 
-All automotive imagery was generated specifically for this fictional portfolio project with OpenAI's built-in image generation tool. The project uses optimized responsive WebP variants stored in `public/images/`. Source-resolution working copies are kept outside the production asset path in `work/imagegen-sources/`.
+The configuration also owns:
 
-## Content and languages
+- business name;
+- public website URL;
+- consent policy version;
+- pricing version;
+- Google Forms action and field mappings.
 
-All visible interface copy is available in English, Latvian and Russian in `src/i18n/translations.ts`. The selected language is stored in `localStorage`, with English as the fallback.
+Unknown values are `null` in configuration and render as clearly marked required configuration. Do not replace them with invented contact details.
+
+No environment variables or secrets are currently used, so there is no `.env.example`.
+
+## Pricing
+
+`src/pricing.ts` is the source of truth for service prices, durations, vehicle multipliers, package prices, package service selections and pricing calculations. The estimator and booking summary both use `calculateEstimate`.
+
+Prices shown in the browser are non-authoritative client-side estimates. The studio must inspect the vehicle and separately confirm the final scope and price.
+
+## Booking request behavior
+
+The form is a booking request, not an automatic reservation system.
+
+After validation, the browser attempts a `no-cors` POST to Google Forms. A resolved browser request cannot prove that Google accepted or stored the response. The interface therefore:
+
+- keeps the request pending until separate confirmation;
+- generates a `VEL-YYYY-XXXXXXXX` reference for follow-up;
+- states that the reference is not proof of receipt;
+- prevents repeated identical submissions in the current browser session;
+- offers an email fallback only when a booking email is configured.
+
+There is no server-side availability check, authoritative price calculation or double-booking prevention yet.
+
+## Google Forms setup
+
+The existing form mappings in `src/config/site.ts` cover:
+
+- customer name;
+- normalized phone;
+- email;
+- vehicle description;
+- service names;
+- structured request details in the message field;
+- consent record;
+- language;
+- preferred date.
+
+The structured message includes the request reference, service IDs and names, vehicle category and multiplier, client-side price and duration estimates, pricing version, consent timestamp and consent policy version. This keeps the current form working without inventing unknown Google Form entry IDs.
+
+For cleaner spreadsheet columns, manually add questions to Google Forms for the following values, then copy their real `entry.*` IDs into `googleForms.optionalFields`:
+
+- `requestReference`;
+- `serviceIds`;
+- `vehicleCategory`;
+- `vehicleMultiplier`;
+- `estimatedPrice`;
+- `estimatedDuration`;
+- `pricingVersion`;
+- `consentTimestamp`;
+- `consentPolicyVersion`.
+
+Missing optional mappings are intentionally `null` and do not break submission.
+
+## Privacy
+
+The privacy modal explains the collected data, purpose, Google Forms/Sheets processing, intended legal basis, deletion requests, pending booking status and consent version.
+
+Before commercial launch, the owner must confirm the final controller identity, legal basis, privacy contact and retention period, and obtain appropriate legal review. Google Forms and Google Sheets remain third-party processors in the temporary flow.
+
+## Netlify
+
+`netlify.toml` configures:
+
+- build command: `npm run build`;
+- publish directory: `dist`;
+- SPA fallback to `index.html`;
+- CSP, frame, referrer, MIME-sniffing and browser permissions headers.
+
+In Netlify, confirm that the production branch remains `main` until the upgrade is reviewed and intentionally merged. Do not deploy `professional-upgrade` to production during Phase 1.
+
+## Current limitations and future migration
+
+Google Forms is temporary. It does not provide:
+
+- a trustworthy application-level delivery acknowledgement;
+- server-side validation;
+- availability locking or double-booking prevention;
+- authenticated staff workflows;
+- controlled retention automation;
+- audit logs or reliable status transitions.
+
+The recommended next phase is a server-controlled reservation API with a database, transactional availability checks, server-side validation, rate limiting, consent/audit records, staff status management and verified customer notifications. Client-submitted estimates must be recalculated on that server.
+
+## Images and stale artifacts
+
+The responsive WebP automotive images in `public/images/` were generated for this fictional portfolio project.
+
+The local archive `outputs/velora-detail-lab-netlify.zip` predates this stabilization work, is excluded from Git and must not be used for deployment. Netlify should build from the repository instead.
