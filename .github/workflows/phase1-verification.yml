@@ -21,10 +21,12 @@ jobs:
         with:
           node-version: 24
 
-      - name: Report tool versions
+      - name: Report tool versions and source blob
         run: |
           node --version
           npm --version
+          git rev-parse HEAD^{tree}
+          git ls-tree HEAD src/i18n/translations.ts
 
       - name: Install dependencies and generate package lock
         run: npm install
