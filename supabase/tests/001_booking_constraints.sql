@@ -5,8 +5,16 @@ select has_table('public', 'bookings', 'bookings table exists');
 select col_is_unique('public', 'bookings', 'reference', 'booking reference is unique');
 select col_is_unique('public', 'bookings', 'idempotency_key', 'idempotency key is unique');
 select policies_are('public', 'bookings', array[]::text[], 'bookings use deny-by-default RLS');
-select hasnt_table_privilege('anon', 'public', 'bookings', 'select', 'anonymous users cannot read bookings');
-select has_table_privilege('service_role', 'public', 'bookings', 'insert', 'service role can create bookings');
+select is(
+  has_table_privilege('anon', 'public.bookings', 'select'),
+  false,
+  'anonymous users cannot read bookings'
+);
+select is(
+  has_table_privilege('service_role', 'public.bookings', 'insert'),
+  true,
+  'service role can create bookings'
+);
 
 insert into public.customers (
   id, full_name, normalized_email, normalized_phone

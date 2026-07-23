@@ -13,3 +13,4 @@ work
 verification/
 playwright-report/
 test-results/
+supabase/.temp/
