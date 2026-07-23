@@ -1,7 +1,9 @@
 name: Phase 1 npm verification
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - professional-upgrade
 
 permissions:
   contents: read
