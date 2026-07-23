@@ -1,25 +1,11 @@
-export const services = [
-  { id: 'exterior', price: 45, hours: 2, cardDuration: '1.5–2 h', estimatorOnly: false },
-  { id: 'interior', price: 120, hours: 5, cardDuration: '4–6 h', estimatorOnly: false },
-  { id: 'correction', price: 220, hours: 8, cardDuration: '6–10 h', estimatorOnly: false },
-  { id: 'ceramic', price: 450, hours: 14, cardDuration: '1–2 days', estimatorOnly: false },
-  { id: 'ppfFront', price: 900, hours: 16, cardDuration: '1–2 days', estimatorOnly: false },
-  { id: 'ppfFull', price: 2500, hours: 40, cardDuration: '3–5 days', estimatorOnly: true },
-  { id: 'maintenance', price: 75, hours: 2.5, cardDuration: '2–3 h', estimatorOnly: false },
-] as const
-
-export type ServiceId = (typeof services)[number]['id']
-
-export const vehicleTypes = [
-  { id: 'compact', multiplier: 1 },
-  { id: 'sedan', multiplier: 1.1 },
-  { id: 'suv', multiplier: 1.25 },
-  { id: 'large', multiplier: 1.4 },
-] as const
-
-export type VehicleId = (typeof vehicleTypes)[number]['id']
-
-export const serviceCards = services.filter((service) => !service.estimatorOnly)
+export {
+  packages,
+  serviceCards,
+  services,
+  vehicleTypes,
+  type ServiceId,
+  type VehicleId,
+} from './pricing'
 
 export const galleryItems = [
   {
@@ -73,12 +59,6 @@ export const galleryItems = [
 ] as const
 
 export type GalleryCategory = 'all' | (typeof galleryItems)[number]['category']
-
-export const packages = [
-  { id: 'essential', price: 89, featured: false },
-  { id: 'restore', price: 279, featured: true },
-  { id: 'protect', price: 549, featured: false },
-] as const
 
 export const processSteps = ['assessment', 'preparation', 'detail', 'inspection'] as const
 

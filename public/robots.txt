@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.velora.example/sitemap.xml
+Sitemap: https://auto-velora.netlify.app/sitemap.xml
