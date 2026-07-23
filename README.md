@@ -1,15 +1,17 @@
 # VELORA Detail Lab
 
-Production website for a fictional premium automotive detailing studio in Riga. It uses React, TypeScript, Vite, Lucide icons and hand-authored CSS.
+Portfolio website for a fictional premium automotive detailing studio in Riga. It uses React, TypeScript, Vite, Lucide icons and hand-authored CSS.
 
-Production URL: <https://auto-velora.netlify.app/>
+Public portfolio URL: <https://auto-velora.netlify.app/>
+
+The public booking interface currently runs only as a demonstration. Information entered into it is validated in the browser but is not sent or stored, and no real reservation is created.
 
 ## Local setup
 
 Requirements: Node.js 20 or newer and npm.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -51,6 +53,7 @@ The configuration also owns:
 
 - business name;
 - public website URL;
+- submission mode;
 - consent policy version;
 - pricing version;
 - Google Forms action and field mappings.
@@ -67,19 +70,36 @@ Prices shown in the browser are non-authoritative client-side estimates. The stu
 
 ## Booking request behavior
 
-The form is a booking request, not an automatic reservation system.
+`submissionMode` is typed as `'demo' | 'googleForms'` and defaults to `'demo'`.
 
-After validation, the browser attempts a `no-cors` POST to Google Forms. A resolved browser request cannot prove that Google accepted or stored the response. The interface therefore:
+In demo mode, the form:
 
-- keeps the request pending until separate confirmation;
-- generates a `VEL-YYYY-XXXXXXXX` reference for follow-up;
-- states that the reference is not proof of receipt;
-- prevents repeated identical submissions in the current browser session;
-- offers an email fallback only when a booking email is configured.
+- runs all client-side validation and pricing;
+- generates a demonstration `VEL-YYYY-XXXXXXXX` reference;
+- shows the selected services, estimated price and time, and preferred date;
+- does not call `fetch` or the Google Forms transport;
+- does not save personal data to local storage, session storage or cookies;
+- clears personal form values after producing the non-personal summary;
+- states that no request was transmitted, stored or converted into a real reservation.
+
+Only the language preference is stored in `localStorage`; form values are never stored there.
+
+The Google Forms path remains isolated in `src/booking/googleForms.ts`. If `submissionMode` is deliberately changed to `'googleForms'`, the browser attempts a `no-cors` POST after validation. A resolved request cannot prove that Google accepted or stored it, so the interface continues to describe it as pending rather than confirmed.
 
 There is no server-side availability check, authoritative price calculation or double-booking prevention yet.
 
 ## Google Forms setup
+
+Do not enable Google Forms for public use until a real owner has supplied every required business and privacy value, confirmed the legal basis and retention policy, reviewed the processor relationship, and approved the customer-facing privacy notice.
+
+Temporary enablement process:
+
+1. Complete all required values in `src/config/site.ts`.
+2. Confirm the real form action, required questions and linked-sheet access.
+3. Add the optional questions below and copy their actual `entry.*` IDs.
+4. Obtain appropriate privacy/legal review.
+5. Change `submissionMode` from `'demo'` to `'googleForms'`.
+6. Validate the flow in a Netlify Deploy Preview with non-personal test data before considering a production change.
 
 The existing form mappings in `src/config/site.ts` cover:
 
@@ -111,9 +131,28 @@ Missing optional mappings are intentionally `null` and do not break submission.
 
 ## Privacy
 
-The privacy modal explains the collected data, purpose, Google Forms/Sheets processing, intended legal basis, deletion requests, pending booking status and consent version.
+The current demo does not transmit or persist information entered into the booking form. The privacy modal explains the demo behavior and the processing that would apply only after a deliberate switch to Google Forms mode.
 
 Before commercial launch, the owner must confirm the final controller identity, legal basis, privacy contact and retention period, and obtain appropriate legal review. Google Forms and Google Sheets remain third-party processors in the temporary flow.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on:
+
+- pull requests targeting `main`;
+- pushes to `main`;
+- manual workflow dispatch.
+
+The workflow uses Node.js 24, npm caching based on `package-lock.json`, and minimum read-only repository permissions. It runs:
+
+```bash
+npm ci
+npm run lint
+npm run test
+npm run build
+```
+
+Any failed command fails the workflow. The workflow contains no deployment steps.
 
 ## Netlify
 
@@ -126,9 +165,18 @@ Before commercial launch, the owner must confirm the final controller identity, 
 
 In Netlify, confirm that the production branch remains `main` until the upgrade is reviewed and intentionally merged. Do not deploy `professional-upgrade` to production during Phase 1.
 
+For review, use a Netlify Deploy Preview attached to the pull request:
+
+1. Confirm the preview was built from the expected pull-request commit.
+2. Verify the demo warning in English, Latvian and Russian.
+3. Complete the form with non-personal test values and confirm the demonstration summary.
+4. Confirm DevTools shows no Google Forms request and no storage of form values.
+5. Check navigation, responsive layouts, accessibility and CSP console output.
+6. Never promote the preview to production from this workflow.
+
 ## Current limitations and future migration
 
-Google Forms is temporary. It does not provide:
+Demo mode is safe for the portfolio but is not a reservation system. Google Forms is retained only as a temporary future transport and does not provide:
 
 - a trustworthy application-level delivery acknowledgement;
 - server-side validation;
@@ -137,7 +185,7 @@ Google Forms is temporary. It does not provide:
 - controlled retention automation;
 - audit logs or reliable status transitions.
 
-The recommended next phase is a server-controlled reservation API with a database, transactional availability checks, server-side validation, rate limiting, consent/audit records, staff status management and verified customer notifications. Client-submitted estimates must be recalculated on that server.
+Before commercial launch, Google Forms should be replaced by a server-controlled reservation API with a database, transactional availability checks, server-side validation, rate limiting, consent/audit records, staff status management and verified customer notifications. Client-submitted estimates must be recalculated on that server.
 
 ## Images and stale artifacts
 

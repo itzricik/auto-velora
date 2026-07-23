@@ -1,7 +1,9 @@
 import { Check, LoaderCircle, Send, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { buildGoogleFormsPayload } from '../booking/payload'
-import { generateRequestReference } from '../booking/reference'
+import {
+  submitBookingRequest,
+  type BookingSubmissionSummary,
+} from '../booking/submission'
 import {
   BOOKING_LIMITS,
   buildSubmissionFingerprint,
@@ -24,7 +26,7 @@ type BookingProps = {
 }
 
 type FormValues = Omit<BookingFormValues, 'serviceIds'> & { serviceIds: ServiceId[] }
-type SubmitStatus = 'idle' | 'loading' | 'attempted' | 'error'
+type SubmitStatus = 'idle' | 'loading' | 'demo' | 'attempted' | 'error'
 
 const emptyValues: FormValues = {
   name: '',
@@ -44,8 +46,10 @@ export function Booking({ language, estimatorSelections, estimatorVehicle }: Boo
   const [status, setStatus] = useState<SubmitStatus>('idle')
   const [statusError, setStatusError] = useState('')
   const [requestReference, setRequestReference] = useState('')
+  const [demoSummary, setDemoSummary] = useState<BookingSubmissionSummary | null>(null)
   const lastSubmission = useRef('')
   const submissionInFlight = useRef(false)
+  const isDemoMode = siteConfig.submissionMode === 'demo'
   const minDate = useMemo(getLocalDate, [])
   const estimate = useMemo(
     () => calculateEstimate(values.serviceIds, estimatorVehicle),
@@ -64,6 +68,7 @@ export function Booking({ language, estimatorSelections, estimatorVehicle }: Boo
     if (status !== 'loading') {
       setStatus('idle')
       setRequestReference('')
+      setDemoSummary(null)
     }
     setStatusError('')
   }
@@ -77,6 +82,7 @@ export function Booking({ language, estimatorSelections, estimatorVehicle }: Boo
 
   const fieldError = (field: BookingField) => {
     const errorCode = touched[field] ? errors[field] : undefined
+    if (errorCode === 'consent' && isDemoMode) return copy.booking.errors.demoConsent
     return errorCode ? copy.booking.errors[errorCode] : ''
   }
 
@@ -101,50 +107,53 @@ export function Booking({ language, estimatorSelections, estimatorVehicle }: Boo
     const fingerprint = buildSubmissionFingerprint(values)
     if (isDuplicateSubmission(fingerprint, lastSubmission.current, submissionInFlight.current)) {
       setStatus('error')
-      setStatusError(copy.booking.errors.duplicate)
+      setStatusError(isDemoMode ? copy.booking.errors.demoDuplicate : copy.booking.errors.duplicate)
       return
     }
 
     const cleanValues = sanitizeBookingValues(values)
-    const reference = generateRequestReference()
     const consentTimestamp = new Date().toISOString()
     const serviceNames = cleanValues.serviceIds.map((id) => copy.serviceNames[id])
-    const payload = buildGoogleFormsPayload({
-      requestReference: reference,
-      name: cleanValues.name,
-      normalizedPhone: cleanValues.phone,
-      email: cleanValues.email,
-      vehicle: cleanValues.vehicle,
-      serviceIds: cleanValues.serviceIds,
-      serviceNames,
-      vehicleId: estimatorVehicle,
-      selectedDate: cleanValues.date,
-      language,
-      message: cleanValues.message,
-      consentTimestamp,
-    })
 
     submissionInFlight.current = true
-    setRequestReference(reference)
+    setDemoSummary(null)
     setStatus('loading')
 
     try {
-      await fetch(siteConfig.googleForms.action, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: payload,
+      const result = await submitBookingRequest(siteConfig.submissionMode, {
+        name: cleanValues.name,
+        normalizedPhone: cleanValues.phone,
+        email: cleanValues.email,
+        vehicle: cleanValues.vehicle,
+        serviceIds: cleanValues.serviceIds,
+        serviceNames,
+        vehicleId: estimatorVehicle,
+        selectedDate: cleanValues.date,
+        language,
+        message: cleanValues.message,
+        consentTimestamp,
       })
-      lastSubmission.current = fingerprint
-      setStatus('attempted')
+      setRequestReference(result.summary.requestReference)
+
+      if (result.mode === 'demo') {
+        lastSubmission.current = ''
+        setDemoSummary(result.summary)
+        setValues(emptyValues)
+        setTouched({})
+        setStatus('demo')
+      } else {
+        lastSubmission.current = fingerprint
+        setStatus('attempted')
+      }
     } catch {
       setStatus('error')
-      setStatusError(copy.booking.errors.generic)
+      setStatusError(isDemoMode ? copy.booking.errors.demoGeneric : copy.booking.errors.generic)
     } finally {
       submissionInFlight.current = false
     }
   }
 
-  const fallbackMailto = siteConfig.bookingEmail
+  const fallbackMailto = siteConfig.submissionMode === 'googleForms' && siteConfig.bookingEmail
     ? `mailto:${siteConfig.bookingEmail}?subject=${encodeURIComponent(`${siteConfig.businessName} request ${requestReference || ''}`)}`
     : null
 
@@ -158,11 +167,16 @@ export function Booking({ language, estimatorSelections, estimatorVehicle }: Boo
     <section className="section booking-section" id="booking">
       <div className="container booking-layout">
         <div className="booking-intro">
-          <SectionIntro eyebrow={copy.booking.eyebrow} title={copy.booking.title} body={copy.booking.body} />
-          <div className="booking-trust" data-reveal><ShieldCheck size={22} aria-hidden="true" /><p>{copy.booking.pendingNotice}</p></div>
+          <SectionIntro
+            eyebrow={isDemoMode ? copy.booking.demoEyebrow : copy.booking.eyebrow}
+            title={copy.booking.title}
+            body={isDemoMode ? copy.booking.demoBody : copy.booking.body}
+          />
+          <div className="booking-trust" data-reveal><ShieldCheck size={22} aria-hidden="true" /><p>{isDemoMode ? copy.booking.demoNotice : copy.booking.pendingNotice}</p></div>
         </div>
 
         <form className="booking-form" noValidate onSubmit={submit} data-reveal>
+          {isDemoMode && <p className="booking-demo-warning">{copy.booking.demoWarning}</p>}
           <div className="form-grid">
             <div className="field">
               <label htmlFor="booking-name">{copy.booking.name}</label>
@@ -225,16 +239,32 @@ export function Booking({ language, estimatorSelections, estimatorVehicle }: Boo
 
           <label className="consent-field">
             <input type="checkbox" checked={values.consent} onChange={(event) => updateValue('consent', event.target.checked)} onBlur={() => markTouched('consent')} aria-invalid={Boolean(fieldError('consent'))} aria-describedby={fieldError('consent') ? 'booking-consent-error' : undefined} />
-            <span className="checkbox-ui">{values.consent && <Check size={15} aria-hidden="true" />}</span><span>{copy.booking.consent}</span>
+            <span className="checkbox-ui">{values.consent && <Check size={15} aria-hidden="true" />}</span><span>{isDemoMode ? copy.booking.demoConsent : copy.booking.consent}</span>
           </label>
           {fieldError('consent') && <span className="field-error consent-error" id="booking-consent-error">{fieldError('consent')}</span>}
 
           <button className="button button--copper button--full booking-submit" type="submit" disabled={status === 'loading'}>
             {status === 'loading' ? <LoaderCircle className="spin" size={19} aria-hidden="true" /> : <Send size={19} aria-hidden="true" />}
-            {status === 'loading' ? copy.booking.submitting : copy.booking.submit}
+            {status === 'loading'
+              ? isDemoMode ? copy.booking.demoSubmitting : copy.booking.submitting
+              : isDemoMode ? copy.booking.demoSubmit : copy.booking.submit}
           </button>
 
           <div className={`form-status form-status--${status}`} aria-live="polite">
+            {status === 'demo' && demoSummary && (
+              <>
+                <strong>{copy.booking.demoSuccess}</strong>
+                <span>{copy.booking.demoNoReservation}</span>
+                <span>{copy.booking.demoNoTransmission}</span>
+                <span className="request-reference">{copy.booking.reference}: <b>{demoSummary.requestReference}</b></span>
+                <dl className="demo-summary">
+                  <div><dt>{copy.booking.demoServices}</dt><dd>{demoSummary.serviceNames.join(', ')}</dd></div>
+                  <div><dt>{copy.booking.estimatePrice}</dt><dd>{formatPrice(demoSummary.estimatedPrice)}</dd></div>
+                  <div><dt>{copy.booking.estimateDuration}</dt><dd>{demoSummary.estimatedHours} h</dd></div>
+                  <div><dt>{copy.booking.date}</dt><dd>{demoSummary.selectedDate}</dd></div>
+                </dl>
+              </>
+            )}
             {status === 'attempted' && (
               <>
                 <strong>{copy.booking.attempted}</strong>

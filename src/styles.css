@@ -328,6 +328,7 @@
   .booking-trust svg { flex: 0 0 auto; color: var(--copper-light); }
   .booking-trust p { color: var(--muted); font-size: .78rem; line-height: 1.55; }
   .booking-form { padding: clamp(1.3rem,4vw,3.2rem); border-top: 2px solid var(--copper); background: #0d0f13; box-shadow: var(--shadow); }
+  .booking-demo-warning { margin: 0 0 1.5rem; padding: .85rem 1rem; border-left: 2px solid var(--copper); background: rgba(200,132,82,.08); color: var(--paper); font-size: .78rem; line-height: 1.55; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
   .field { position: relative; display: flex; flex-direction: column; margin-bottom: 1.25rem; }
   .field label, .booking-services legend { display: flex; align-items: center; justify-content: space-between; margin-bottom: .48rem; color: #d5d3ce; font-size: .72rem; font-weight: 700; }
@@ -365,10 +366,16 @@
   .consent-error { margin-bottom: .7rem; }
   .booking-submit { margin-top: 1.4rem; }
   .form-status { min-height: 0; margin-top: 1rem; font-size: .72rem; }
+  .form-status--demo { display: flex; flex-direction: column; gap: .55rem; padding: 1rem; border: 1px solid rgba(200,132,82,.5); background: rgba(200,132,82,.08); }
+  .form-status--demo > span { color: var(--muted); line-height: 1.5; }
   .form-status--attempted { display: flex; flex-direction: column; gap: .45rem; padding: .9rem; border: 1px solid rgba(200,132,82,.4); background: rgba(200,132,82,.08); }
   .form-status--attempted span, .form-status--attempted small { color: var(--muted); line-height: 1.5; }
   .form-status--attempted a { color: var(--copper-light); text-decoration: underline; text-underline-offset: .2em; }
   .request-reference b { color: var(--paper); font-family: var(--display); letter-spacing: .06em; }
+  .demo-summary { display: grid; gap: .45rem; margin-top: .3rem; padding-top: .7rem; border-top: 1px solid var(--line); }
+  .demo-summary div { display: flex; justify-content: space-between; gap: 1rem; }
+  .demo-summary dt { color: var(--muted-deep); }
+  .demo-summary dd { color: var(--paper); text-align: right; }
   .form-status--error { color: #ef9b8d; }
   .form-status--error a { color: inherit; text-decoration: underline; text-underline-offset: .2em; }
   .spin { animation: spin 900ms linear infinite; }

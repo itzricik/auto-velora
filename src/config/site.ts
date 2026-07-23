@@ -9,9 +9,12 @@ type OptionalGoogleFormField =
   | 'consentTimestamp'
   | 'consentPolicyVersion'
 
+export type SubmissionMode = 'demo' | 'googleForms'
+
 export type PublicSiteConfig = {
   businessName: string
   publicUrl: string
+  submissionMode: SubmissionMode
   bookingEmail: string | null
   phoneDisplay: string | null
   phoneHref: string | null
@@ -53,6 +56,7 @@ export type PublicSiteConfig = {
 export const siteConfig: PublicSiteConfig = {
   businessName: 'VELORA Detail Lab',
   publicUrl: 'https://auto-velora.netlify.app/',
+  submissionMode: 'demo',
   bookingEmail: null,
   phoneDisplay: null,
   phoneHref: null,
