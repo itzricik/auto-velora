@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
 
       - name: Report tool versions
         run: |
@@ -47,5 +46,3 @@ jobs:
           path: package-lock.json
           if-no-files-found: error
           retention-days: 1
-
-# Verification run trigger
