@@ -1,8 +1,9 @@
 import { parsePublicBookingRequest } from '../../src/shared/contracts'
 import { createProfessionalBooking } from './_lib/booking-service'
-import { getRuntimeConfig } from './_lib/env'
+import { getNotificationConfig, getRuntimeConfig } from './_lib/env'
 import { apiError, enforceOrigin, json, readJsonBody, requestId } from './_lib/http'
 import { logServerResult } from './_lib/logger'
+import { sendBookingNotifications } from './_lib/notifications'
 import { clientIp, enforceBookingRateLimits, verifyTurnstile } from './_lib/protection'
 import { createSupabaseServer, SupabaseError } from './_lib/supabase'
 
@@ -56,9 +57,35 @@ export default async function handler(request: Request): Promise<Response> {
       tokenSecret: config.rateLimitSecret,
       requestId: id,
     })
-    bookingId = result.bookingId
-    resultStatus = result.wasExisting ? 'idempotent_replay' : 'success'
-    return json(result, result.wasExisting ? 200 : 201)
+    const {
+      bookingId: internalBookingId,
+      wasExisting,
+      notification,
+      ...publicResult
+    } = result
+    bookingId = internalBookingId
+    if (!wasExisting) {
+      publicResult.notificationStatus = await sendBookingNotifications(
+        db,
+        getNotificationConfig(),
+        {
+          bookingId,
+          customerEmail: notification.customerEmail,
+          reference: publicResult.reference,
+          status: publicResult.status,
+          start: publicResult.start,
+          end: publicResult.end,
+          services: notification.services,
+          vehicle: notification.vehicle,
+          estimatedPriceCents: publicResult.serverPriceCents,
+          managementUrl: publicResult.managementUrl,
+          language: notification.language,
+          event: 'created',
+        },
+      ).catch(() => 'failed')
+    }
+    resultStatus = wasExisting ? 'idempotent_replay' : 'success'
+    return json(publicResult, wasExisting ? 200 : 201)
   } catch (error) {
     errorCode = error instanceof Error ? error.message : 'UNEXPECTED_ERROR'
     if (errorCode === 'BODY_TOO_LARGE') return apiError(413, errorCode, 'The request body is too large.', id)

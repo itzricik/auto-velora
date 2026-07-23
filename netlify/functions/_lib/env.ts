@@ -56,3 +56,11 @@ export function getRuntimeConfig(): RuntimeConfig {
 export function getOptionalEnvironment(name: string): string | undefined {
   return environment()[name]?.trim() || undefined
 }
+
+export function getNotificationConfig() {
+  return {
+    apiKey: getOptionalEnvironment('RESEND_API_KEY'),
+    fromEmail: getOptionalEnvironment('RESEND_FROM_EMAIL'),
+    ownerEmail: getOptionalEnvironment('BOOKING_OWNER_EMAIL'),
+  }
+}

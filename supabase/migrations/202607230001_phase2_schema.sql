@@ -154,6 +154,7 @@ create table public.bookings (
   final_price_cents integer check (final_price_cents is null or final_price_cents >= 0),
   currency char(3) not null default 'EUR' check (currency = 'EUR'),
   pricing_version text not null,
+  booking_language text not null check (booking_language in ('en', 'lv', 'ru')),
   customer_notes text check (customer_notes is null or char_length(customer_notes) <= 1500),
   internal_notes text check (internal_notes is null or char_length(internal_notes) <= 5000),
   consent_timestamp timestamptz not null,

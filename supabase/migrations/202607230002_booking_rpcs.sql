@@ -53,6 +53,7 @@ create function public.create_booking_transactional(
   p_estimated_price_cents integer,
   p_estimated_duration_minutes integer,
   p_pricing_version text,
+  p_booking_language text,
   p_customer_notes text,
   p_consent_timestamp timestamptz,
   p_consent_policy_version text,
@@ -114,14 +115,14 @@ begin
         reference, public_access_token_hash, customer_id, work_bay_id,
         vehicle_category_id, vehicle_description, starts_at, ends_at, status,
         estimated_price_cents, estimated_duration_minutes, pricing_version,
-        customer_notes, consent_timestamp, consent_policy_version, idempotency_key,
+        booking_language, customer_notes, consent_timestamp, consent_policy_version, idempotency_key,
         confirmed_at
       )
       values (
         p_reference, p_public_access_token_hash, v_customer_id, v_bay.id,
         p_vehicle_category_id, p_vehicle_description, p_starts_at, p_ends_at,
         p_status, p_estimated_price_cents, p_estimated_duration_minutes,
-        p_pricing_version, nullif(p_customer_notes, ''), p_consent_timestamp,
+        p_pricing_version, p_booking_language, nullif(p_customer_notes, ''), p_consent_timestamp,
         p_consent_policy_version, p_idempotency_key,
         case when p_status = 'confirmed' then now() else null end
       )
@@ -226,14 +227,14 @@ $$;
 revoke all on function public.check_rate_limit(text, text, integer, integer) from public, anon, authenticated;
 revoke all on function public.create_booking_transactional(
   text, text, text, text, text, uuid, text, timestamptz, timestamptz,
-  public.booking_status, integer, integer, text, text, timestamptz, text, uuid, jsonb
+  public.booking_status, integer, integer, text, text, text, timestamptz, text, uuid, jsonb
 ) from public, anon, authenticated;
 revoke all on function public.cancel_public_booking(text, text, text, integer) from public, anon, authenticated;
 
 grant execute on function public.check_rate_limit(text, text, integer, integer) to service_role;
 grant execute on function public.create_booking_transactional(
   text, text, text, text, text, uuid, text, timestamptz, timestamptz,
-  public.booking_status, integer, integer, text, text, timestamptz, text, uuid, jsonb
+  public.booking_status, integer, integer, text, text, text, timestamptz, text, uuid, jsonb
 ) to service_role;
 grant execute on function public.cancel_public_booking(text, text, text, integer) to service_role;
 

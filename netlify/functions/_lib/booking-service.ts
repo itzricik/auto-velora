@@ -46,7 +46,16 @@ export async function createProfessionalBooking(input: {
   tokenSecret: string
   requestId: string
   now?: Date
-}): Promise<PublicBookingResult & { bookingId: string; wasExisting: boolean }> {
+}): Promise<PublicBookingResult & {
+  bookingId: string
+  wasExisting: boolean
+  notification: {
+    customerEmail: string
+    services: string[]
+    vehicle: string
+    language: PublicBookingRequest['language']
+  }
+}> {
   const catalog = await loadCatalogSelection(input.db, {
     vehicleCategoryId: input.request.vehicleCategoryId,
     serviceIds: input.request.serviceIds,
@@ -93,6 +102,7 @@ export async function createProfessionalBooking(input: {
         p_estimated_price_cents: estimate.priceCents,
         p_estimated_duration_minutes: estimate.durationMinutes,
         p_pricing_version: '2026-07-phase2',
+        p_booking_language: input.request.language,
         p_customer_notes: input.request.customerNotes ?? '',
         p_consent_timestamp: (input.now ?? new Date()).toISOString(),
         p_consent_policy_version: input.request.consentPolicyVersion,
@@ -127,5 +137,11 @@ export async function createProfessionalBooking(input: {
     notificationStatus: 'not_configured',
     message: messages[input.request.language][booking.status],
     requestId: input.requestId,
+    notification: {
+      customerEmail: input.request.email,
+      services: estimate.services.map((service) => service.name),
+      vehicle: input.request.vehicleDescription,
+      language: input.request.language,
+    },
   }
 }

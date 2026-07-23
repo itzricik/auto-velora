@@ -194,3 +194,67 @@ export async function cancelPublicBooking(
   if (!rows[0]) throw new Error('BOOKING_NOT_CANCELLED')
   return rows[0]
 }
+
+export async function createNotificationLog(
+  db: SupabaseServer,
+  input: {
+    bookingId: string
+    type: string
+    recipient: string
+  },
+): Promise<string> {
+  const rows = await db.request<Array<{ id: string }>>('/rest/v1/notification_logs?select=id', {
+    method: 'POST',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({
+      booking_id: input.bookingId,
+      notification_type: input.type,
+      recipient: input.recipient,
+      provider: 'resend',
+      status: 'pending',
+    }),
+  })
+  if (!rows[0]) throw new Error('NOTIFICATION_LOG_FAILED')
+  return rows[0].id
+}
+
+export async function updateNotificationLog(
+  db: SupabaseServer,
+  id: string,
+  input: {
+    status: 'sent' | 'failed'
+    providerMessageId?: string
+    errorCode?: string
+  },
+): Promise<void> {
+  await db.request(`/rest/v1/notification_logs?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({
+      status: input.status,
+      provider_message_id: input.providerMessageId ?? null,
+      error_message: input.errorCode ?? null,
+      sent_at: input.status === 'sent' ? new Date().toISOString() : null,
+    }),
+  })
+}
+
+export type NotificationBooking = {
+  id: string
+  reference: string
+  status: BookingStatus
+  starts_at: string
+  ends_at: string
+  estimated_price_cents: number
+  vehicle_description: string
+  booking_language: BookingLanguage
+  customers: { normalized_email: string } | Array<{ normalized_email: string }>
+  booking_services: Array<{ service_name_snapshot: string }>
+}
+
+export async function loadNotificationBooking(db: SupabaseServer, bookingId: string): Promise<NotificationBooking | null> {
+  const rows = await db.request<NotificationBooking[]>(
+    `/rest/v1/bookings?id=eq.${bookingId}&select=id,reference,status,starts_at,ends_at,estimated_price_cents,vehicle_description,booking_language,customers(normalized_email),booking_services(service_name_snapshot)&limit=1`,
+  )
+  return rows[0] ?? null
+}

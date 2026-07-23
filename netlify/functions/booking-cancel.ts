@@ -1,8 +1,9 @@
 import { hashPublicAccessToken } from '../../src/shared/security'
-import { getRuntimeConfig } from './_lib/env'
+import { getNotificationConfig, getRuntimeConfig } from './_lib/env'
 import { apiError, enforceOrigin, json, readJsonBody, requestId } from './_lib/http'
 import { logServerResult } from './_lib/logger'
-import { cancelPublicBooking } from './_lib/repository'
+import { sendBookingNotifications } from './_lib/notifications'
+import { cancelPublicBooking, loadNotificationBooking } from './_lib/repository'
 import { createSupabaseServer, SupabaseError } from './_lib/supabase'
 
 export default async function handler(request: Request): Promise<Response> {
@@ -34,6 +35,28 @@ export default async function handler(request: Request): Promise<Response> {
       config.cancellationHours,
     )
     bookingId = result.booking_id
+    const notificationBooking = await loadNotificationBooking(db, bookingId)
+    if (notificationBooking) {
+      const customerRecord = Array.isArray(notificationBooking.customers)
+        ? notificationBooking.customers[0]
+        : notificationBooking.customers
+      if (customerRecord?.normalized_email) {
+        await sendBookingNotifications(db, getNotificationConfig(), {
+          bookingId,
+          customerEmail: customerRecord.normalized_email,
+          reference,
+          status: 'cancelled',
+          start: notificationBooking.starts_at,
+          end: notificationBooking.ends_at,
+          services: notificationBooking.booking_services.map((service) => service.service_name_snapshot),
+          vehicle: notificationBooking.vehicle_description,
+          estimatedPriceCents: notificationBooking.estimated_price_cents,
+          managementUrl: `${config.publicSiteUrl}/booking?reference=${encodeURIComponent(reference)}&token=${encodeURIComponent(token)}`,
+          language: notificationBooking.booking_language,
+          event: 'cancelled',
+        }).catch(() => 'failed')
+      }
+    }
     resultStatus = 'success'
     return json({ reference, status: result.status, start: result.starts_at, requestId: id })
   } catch (error) {
