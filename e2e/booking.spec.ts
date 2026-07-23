@@ -42,7 +42,7 @@ test('completes a manual booking without persisting customer data', async ({ pag
   })
 
   await page.goto('/#booking')
-  await page.getByLabel('Signature Exterior').check()
+  await page.getByRole('checkbox', { name: 'Signature Exterior', exact: true }).check()
   await page.getByLabel('Date').fill('2030-01-02')
   await page.getByRole('button', { name: '09:00' }).click()
   await page.getByLabel('Full name').fill('A Test Customer')
