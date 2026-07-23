@@ -43,6 +43,7 @@ export async function submitBookingRequest(
   }
 
   if (mode === 'demo') return { mode, summary }
+  if (mode === 'api') throw new Error('API_MODE_NOT_CONFIGURED')
 
   const transport = dependencies.googleFormsTransport ?? submitGoogleFormsRequest
   await transport({ ...input, requestReference })

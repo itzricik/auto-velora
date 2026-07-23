@@ -9,7 +9,7 @@ type OptionalGoogleFormField =
   | 'consentTimestamp'
   | 'consentPolicyVersion'
 
-export type SubmissionMode = 'demo' | 'googleForms'
+export type SubmissionMode = 'demo' | 'googleForms' | 'api'
 
 export type PublicSiteConfig = {
   businessName: string
