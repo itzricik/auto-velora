@@ -31,7 +31,9 @@ describe('availability slot generation', () => {
       now: new Date('2029-12-01T00:00:00.000Z'),
     })
 
-    expect(slots[0]).toMatchObject({ displayTime: '09:00', availableBayCount: 1 })
+    expect(slots).toHaveLength(1)
+    expect(slots[0]).toMatchObject({ displayTime: '10:30', availableBayCount: 1 })
+    expect(slots.some((slot) => slot.displayTime === '09:00')).toBe(false)
     expect(slots.some((slot) => slot.displayTime === '09:30')).toBe(false)
     expect(slots.at(-1)?.displayTime).toBe('10:30')
   })
