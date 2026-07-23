@@ -1,0 +1,47 @@
+name: Phase 1 npm verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out professional-upgrade
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Report tool versions
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies and generate package lock
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload generated package lock
+        if: ${{ always() && hashFiles('package-lock.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-package-lock
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 1
