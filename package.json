@@ -8,6 +8,9 @@
     "build": "tsc -b && vite build --configLoader runner",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:api": "vitest run tests/netlify-functions",
+    "test:e2e": "playwright test",
+    "test:schema": "node scripts/validate-schema.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,6 +27,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "playwright": "1.61.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5",

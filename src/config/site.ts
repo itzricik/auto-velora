@@ -1,3 +1,5 @@
+import { CURRENT_CONSENT_POLICY_VERSION } from '../shared/contracts'
+
 type OptionalGoogleFormField =
   | 'requestReference'
   | 'serviceIds'
@@ -9,7 +11,7 @@ type OptionalGoogleFormField =
   | 'consentTimestamp'
   | 'consentPolicyVersion'
 
-export type SubmissionMode = 'demo' | 'googleForms'
+export type SubmissionMode = 'demo' | 'googleForms' | 'api'
 
 export type PublicSiteConfig = {
   businessName: string
@@ -53,10 +55,21 @@ export type PublicSiteConfig = {
   }
 }
 
+// E2E mode activates only the mocked browser-test flow. Normal development and
+// production builds stay in demo mode until the external launch checklist passes.
+const configuredSubmissionMode = import.meta.env.VITE_SUBMISSION_MODE
+
+const submissionMode: SubmissionMode =
+  configuredSubmissionMode === 'api' || configuredSubmissionMode === 'googleForms'
+    ? configuredSubmissionMode
+    : import.meta.env.MODE === 'e2e'
+      ? 'api'
+      : 'demo'
+
 export const siteConfig: PublicSiteConfig = {
   businessName: 'VELORA Detail Lab',
   publicUrl: 'https://auto-velora.netlify.app/',
-  submissionMode: 'demo',
+  submissionMode,
   bookingEmail: null,
   phoneDisplay: null,
   phoneHref: null,
@@ -65,7 +78,7 @@ export const siteConfig: PublicSiteConfig = {
   privacyContact: null,
   dataControllerName: null,
   dataRetentionPeriod: null,
-  consentPolicyVersion: '2026-07-phase1',
+  consentPolicyVersion: CURRENT_CONSENT_POLICY_VERSION,
   pricingVersion: '2026-07-phase1',
   requiredConfigurationLabels: {
     email: '[REQUIRED CONFIGURATION: booking email]',

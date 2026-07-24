@@ -12,6 +12,8 @@ import { Booking } from './components/Booking'
 import { Footer } from './components/Footer'
 import { translations, type Language } from './i18n/translations'
 import type { ServiceId, VehicleId } from './pricing'
+import { BookingManager } from './components/BookingManager'
+import { AdminApp } from './components/AdminApp'
 
 function getInitialLanguage(): Language {
   const saved = window.localStorage.getItem('velora-language')
@@ -55,6 +57,14 @@ export default function App() {
   const choosePackage = (serviceIds: ServiceId[]) => {
     setSelectedServices(serviceIds)
     window.setTimeout(scrollToBooking, 0)
+  }
+
+  if (window.location.pathname === '/booking') {
+    return <BookingManager language={language} />
+  }
+
+  if (window.location.pathname.startsWith('/admin')) {
+    return <AdminApp />
   }
 
   return (

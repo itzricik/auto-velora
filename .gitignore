@@ -11,3 +11,6 @@ work
 *.local
 *.tsbuildinfo
 verification/
+playwright-report/
+test-results/
+supabase/.temp/

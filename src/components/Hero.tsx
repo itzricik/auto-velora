@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowRight } from 'lucide-react'
 import { translations, type Language } from '../i18n/translations'
+import { SafeImage } from './SafeImage'
 
 export function Hero({ language }: { language: Language }) {
   const copy = translations[language].hero
@@ -7,8 +8,8 @@ export function Hero({ language }: { language: Language }) {
   return (
     <section className="hero" id="top" aria-labelledby="hero-title">
       <picture className="hero__media">
-        <source media="(max-width: 760px)" srcSet="/images/hero-960.webp" />
-        <img src="/images/hero-1600.webp" width="1600" height="854" alt="" fetchPriority="high" decoding="async" />
+        <source media="(max-width: 760px)" srcSet={`${import.meta.env.BASE_URL}images/hero-960.webp`} />
+        <SafeImage src="/images/hero-1600.webp" width="1600" height="854" alt="" fetchPriority="high" decoding="async" />
       </picture>
       <div className="hero__veil" aria-hidden="true" />
       <div className="hero__content container">

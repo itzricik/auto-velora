@@ -1,6 +1,7 @@
 import { GripVertical } from 'lucide-react'
 import { useState } from 'react'
 import { translations, type Language } from '../i18n/translations'
+import { SafeImage } from './SafeImage'
 import { SectionIntro } from './SectionIntro'
 
 export function BeforeAfter({ language }: { language: Language }) {
@@ -13,12 +14,12 @@ export function BeforeAfter({ language }: { language: Language }) {
         <SectionIntro eyebrow={copy.results.eyebrow} title={copy.results.title} body={copy.results.body} />
         <div className="comparison" style={{ '--comparison-position': `${position}%` } as React.CSSProperties} data-reveal>
           <picture className="comparison__image comparison__image--before">
-            <source media="(max-width: 760px)" srcSet="/images/before-960.webp" />
-            <img src="/images/before-1600.webp" width="1600" height="973" alt={copy.results.beforeAlt} loading="lazy" decoding="async" draggable="false" />
+            <source media="(max-width: 760px)" srcSet={`${import.meta.env.BASE_URL}images/before-960.webp`} />
+            <SafeImage src="/images/before-1600.webp" width="1600" height="973" alt={copy.results.beforeAlt} loading="lazy" decoding="async" draggable="false" />
           </picture>
           <picture className="comparison__image comparison__image--after">
-            <source media="(max-width: 760px)" srcSet="/images/after-960.webp" />
-            <img src="/images/after-1600.webp" width="1600" height="973" alt={copy.results.afterAlt} loading="lazy" decoding="async" draggable="false" />
+            <source media="(max-width: 760px)" srcSet={`${import.meta.env.BASE_URL}images/after-960.webp`} />
+            <SafeImage src="/images/after-1600.webp" width="1600" height="973" alt={copy.results.afterAlt} loading="lazy" decoding="async" draggable="false" />
           </picture>
           <span className="comparison__label comparison__label--before">{copy.results.before}</span>
           <span className="comparison__label comparison__label--after">{copy.results.after}</span>
