@@ -57,7 +57,14 @@ export type PublicSiteConfig = {
 
 // E2E mode activates only the mocked browser-test flow. Normal development and
 // production builds stay in demo mode until the external launch checklist passes.
-const submissionMode: SubmissionMode = import.meta.env.MODE === 'e2e' ? 'api' : 'demo'
+const configuredSubmissionMode = import.meta.env.VITE_SUBMISSION_MODE
+
+const submissionMode: SubmissionMode =
+  configuredSubmissionMode === 'api' || configuredSubmissionMode === 'googleForms'
+    ? configuredSubmissionMode
+    : import.meta.env.MODE === 'e2e'
+      ? 'api'
+      : 'demo'
 
 export const siteConfig: PublicSiteConfig = {
   businessName: 'VELORA Detail Lab',
