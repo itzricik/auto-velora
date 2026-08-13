@@ -163,10 +163,10 @@
     isolation: isolate;
   }
   .hero__media, .hero__veil { position: absolute; inset: 0; }
-  .hero__media { z-index: -3; }
-  .hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: center; animation: hero-scale 1.8s cubic-bezier(.15,.7,.2,1) both; }
-  .hero__veil { z-index: -2; background: linear-gradient(90deg, rgba(8,9,11,.98) 0%, rgba(8,9,11,.86) 34%, rgba(8,9,11,.35) 62%, rgba(8,9,11,.18) 100%), linear-gradient(0deg, rgba(8,9,11,.88) 0%, transparent 40%), radial-gradient(circle at 68% 25%, transparent 0%, rgba(8,9,11,.25) 75%); }
-  .hero__content { display: flex; min-height: max(720px, 100svh); align-items: flex-end; justify-content: space-between; gap: 3rem; padding-top: calc(var(--header-height) + 6rem); padding-bottom: clamp(7rem, 12vh, 9rem); }
+  .hero__media { z-index: 0; }
+  .hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: brightness(1.08) contrast(1.02); animation: hero-scale 1.8s cubic-bezier(.15,.7,.2,1) both; }
+  .hero__veil { z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(8,9,11,.96) 0%, rgba(8,9,11,.72) 34%, rgba(8,9,11,.22) 62%, rgba(8,9,11,.06) 100%), linear-gradient(0deg, rgba(8,9,11,.7) 0%, transparent 42%), radial-gradient(circle at 68% 25%, transparent 0%, rgba(8,9,11,.14) 78%); }
+  .hero__content { position: relative; z-index: 2; display: flex; min-height: max(720px, 100svh); align-items: flex-end; justify-content: space-between; gap: 3rem; padding-top: calc(var(--header-height) + 6rem); padding-bottom: clamp(7rem, 12vh, 9rem); }
   .hero__copy { max-width: 920px; }
   .hero h1 { max-width: 960px; font-size: clamp(3.3rem, 7vw, 7.25rem); font-weight: 740; text-wrap: balance; }
   .hero__body { max-width: 630px; margin-top: 1.8rem; color: #c7c7c8; font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.7; }
@@ -179,7 +179,7 @@
   .hero-entrance--2 { animation-delay: 320ms; }
   .hero-entrance--3 { animation-delay: 470ms; }
   .hero-entrance--4 { animation-delay: 620ms; }
-  .scroll-cue { position: absolute; right: 2rem; bottom: 2rem; display: flex; align-items: center; gap: 0.65rem; color: rgba(244,241,235,.66); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  .scroll-cue { position: absolute; right: 2rem; bottom: 2rem; z-index: 2; display: flex; align-items: center; gap: 0.65rem; color: rgba(244,241,235,.66); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
   .scroll-cue svg { animation: scroll-bob 1.8s ease-in-out infinite; }
 
   .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
@@ -446,7 +446,7 @@
     .mobile-menu__footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
     .hero__highlights { display: none; }
     .hero__copy { max-width: 760px; }
-    .hero__veil { background: linear-gradient(90deg, rgba(8,9,11,.96) 0%, rgba(8,9,11,.75) 60%, rgba(8,9,11,.3) 100%), linear-gradient(0deg, rgba(8,9,11,.92), transparent 55%); }
+    .hero__veil { background: linear-gradient(90deg, rgba(8,9,11,.94) 0%, rgba(8,9,11,.7) 55%, rgba(8,9,11,.16) 100%), linear-gradient(0deg, rgba(8,9,11,.82), transparent 58%); }
     .service-grid { grid-template-columns: repeat(2, 1fr); }
     .estimator { grid-template-columns: 1fr; }
     .estimate-summary { position: relative; top: 0; }
@@ -467,7 +467,7 @@
     .hero { min-height: max(680px, 100svh); }
     .hero__content { min-height: max(680px, 100svh); padding-bottom: 6.5rem; }
     .hero__media img { object-position: 62% center; }
-    .hero__veil { background: linear-gradient(90deg, rgba(8,9,11,.96), rgba(8,9,11,.52)), linear-gradient(0deg, rgba(8,9,11,.97) 0%, rgba(8,9,11,.4) 65%, rgba(8,9,11,.3) 100%); }
+    .hero__veil { background: linear-gradient(90deg, rgba(8,9,11,.94) 0%, rgba(8,9,11,.76) 48%, rgba(8,9,11,.24) 100%), linear-gradient(0deg, rgba(8,9,11,.9) 0%, rgba(8,9,11,.34) 65%, rgba(8,9,11,.16) 100%); }
     .hero h1 { font-size: clamp(3.1rem,15vw,5rem); }
     .hero__body { max-width: 520px; font-size: .96rem; }
     .hero__actions { display: grid; grid-template-columns: 1fr; width: min(100%, 320px); }
