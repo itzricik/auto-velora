@@ -1,3 +1,5 @@
+import { CURRENT_CONSENT_POLICY_VERSION } from '../shared/contracts'
+
 type OptionalGoogleFormField =
   | 'requestReference'
   | 'serviceIds'
@@ -9,7 +11,7 @@ type OptionalGoogleFormField =
   | 'consentTimestamp'
   | 'consentPolicyVersion'
 
-export type SubmissionMode = 'demo' | 'googleForms'
+export type SubmissionMode = 'demo' | 'googleForms' | 'api'
 
 export type PublicSiteConfig = {
   businessName: string
@@ -53,10 +55,19 @@ export type PublicSiteConfig = {
   }
 }
 
+export function resolveSubmissionMode(configuredMode?: string): SubmissionMode {
+  if (configuredMode === 'demo' || configuredMode === 'googleForms') return configuredMode
+  return 'api'
+}
+
+// Real API submission is the production default. Demo and legacy Google Forms
+// modes remain available only as explicit local overrides.
+const submissionMode = resolveSubmissionMode(import.meta.env.VITE_SUBMISSION_MODE)
+
 export const siteConfig: PublicSiteConfig = {
   businessName: 'VELORA Detail Lab',
-  publicUrl: 'https://auto-velora.netlify.app/',
-  submissionMode: 'demo',
+  publicUrl: 'https://autodetailing-velora.netlify.app/',
+  submissionMode,
   bookingEmail: null,
   phoneDisplay: null,
   phoneHref: null,
@@ -65,8 +76,8 @@ export const siteConfig: PublicSiteConfig = {
   privacyContact: null,
   dataControllerName: null,
   dataRetentionPeriod: null,
-  consentPolicyVersion: '2026-07-phase1',
-  pricingVersion: '2026-07-phase1',
+  consentPolicyVersion: CURRENT_CONSENT_POLICY_VERSION,
+  pricingVersion: '2026-08-supabase-v1',
   requiredConfigurationLabels: {
     email: '[REQUIRED CONFIGURATION: booking email]',
     phone: '[REQUIRED CONFIGURATION: phone number]',
