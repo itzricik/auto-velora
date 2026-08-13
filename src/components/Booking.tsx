@@ -18,6 +18,7 @@ import { siteConfig } from '../config/site'
 import { translations, type Language } from '../i18n/translations'
 import { calculateEstimate, services, type ServiceId, type VehicleId } from '../pricing'
 import { SectionIntro } from './SectionIntro'
+import { ApiBooking } from './ApiBooking'
 
 type BookingProps = {
   language: Language
@@ -39,7 +40,11 @@ const emptyValues: FormValues = {
   consent: false,
 }
 
-export function Booking({ language, estimatorSelections, estimatorVehicle }: BookingProps) {
+export function Booking(props: BookingProps) {
+  return siteConfig.submissionMode === 'api' ? <ApiBooking {...props} /> : <LegacyBooking {...props} />
+}
+
+function LegacyBooking({ language, estimatorSelections, estimatorVehicle }: BookingProps) {
   const copy = translations[language]
   const [values, setValues] = useState<FormValues>(emptyValues)
   const [touched, setTouched] = useState<Partial<Record<BookingField, boolean>>>({})

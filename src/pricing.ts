@@ -37,6 +37,14 @@ export const packages = [
 
 export type PackageId = (typeof packages)[number]['id']
 
+export type PackagePriceEstimate = {
+  packageId: PackageId
+  vehicleId: VehicleId
+  multiplier: number
+  baseTotal: number
+  estimatedTotal: number
+}
+
 export type PriceEstimate = {
   serviceIds: ServiceId[]
   vehicleId: VehicleId
@@ -70,6 +78,20 @@ export function calculateEstimate(selectedIds: readonly ServiceId[], vehicleId: 
     estimatedTotal: Math.round(baseTotal * multiplier),
     estimatedHours: Math.round(baseHours * multiplier * 2) / 2,
     pricingVersion: siteConfig.pricingVersion,
+  }
+}
+
+export function calculatePackagePrice(packageId: PackageId, vehicleId: VehicleId): PackagePriceEstimate {
+  const selectedPackage = packages.find((item) => item.id === packageId)
+  const multiplier = vehicleTypes.find((vehicle) => vehicle.id === vehicleId)?.multiplier ?? 1
+  const baseTotal = selectedPackage?.price ?? 0
+
+  return {
+    packageId,
+    vehicleId,
+    multiplier,
+    baseTotal,
+    estimatedTotal: Math.round(baseTotal * multiplier),
   }
 }
 
