@@ -62,7 +62,7 @@ export function resolveSubmissionMode(configuredMode?: string): SubmissionMode {
 
 // Real API submission is the production default. Demo and legacy Google Forms
 // modes remain available only as explicit local overrides.
-const submissionMode = resolveSubmissionMode(import.meta.env.VITE_SUBMISSION_MODE)
+const submissionMode = resolveSubmissionMode(import.meta.env?.VITE_SUBMISSION_MODE)
 
 export const siteConfig: PublicSiteConfig = {
   businessName: 'VELORA Detail Lab',

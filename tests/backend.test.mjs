@@ -7,6 +7,7 @@ import {
   parsePublicBookingRequest,
 } from '../src/shared/contracts.ts'
 import { calculateServerEstimate } from '../src/shared/pricing.ts'
+import { calculatePackagePrice } from '../src/pricing.ts'
 import { canTransitionBooking } from '../src/shared/status.ts'
 import { createProfessionalBooking } from '../netlify/functions/_lib/booking-service.ts'
 import createBookingHandler from '../netlify/functions/create-booking.ts'
@@ -62,6 +63,17 @@ describe('public request boundary', () => {
 })
 
 describe('authoritative pricing and transaction payload', () => {
+  test('previews package totals using the selected vehicle multiplier', () => {
+    assert.deepEqual(calculatePackagePrice('restore', 'compact'), {
+      packageId: 'restore',
+      vehicleId: 'compact',
+      multiplier: 1,
+      baseTotal: 279,
+      estimatedTotal: 279,
+    })
+    assert.equal(calculatePackagePrice('restore', 'large').estimatedTotal, 391)
+  })
+
   test('calculates integer cents and item snapshots', () => {
     const estimate = calculateServerEstimate({
       vehicle: {

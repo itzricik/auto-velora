@@ -7,7 +7,7 @@ import { getLocalDate, normalizePhone } from '../booking/validation'
 import { siteConfig } from '../config/site'
 import { apiBookingCopy } from '../i18n/apiBooking'
 import { translations, type Language } from '../i18n/translations'
-import { calculateEstimate, packages, services, vehicleTypes, type PackageId, type ServiceId, type VehicleId } from '../pricing'
+import { calculateEstimate, calculatePackagePrice, packages, services, vehicleTypes, type PackageId, type ServiceId, type VehicleId } from '../pricing'
 import { SectionIntro } from './SectionIntro'
 import { TurnstileWidget } from './TurnstileWidget'
 
@@ -96,8 +96,12 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
       : selectedServices
     return calculateEstimate(serviceIds, vehicle)
   }, [selectedPackage, selectedServices, vehicle])
+  const bookingPrice = selectedPackage
+    ? calculatePackagePrice(selectedPackage, vehicle)
+    : clientEstimate
+  const clientPriceCents = bookingPrice.estimatedTotal * 100
   const serverDiffers = state.status === 'ready'
-    && state.serverPriceCents !== clientEstimate.estimatedTotal * 100
+    && state.serverPriceCents !== clientPriceCents
 
   const toggleService = (service: ServiceId) => {
     setSelectedPackage('')
@@ -204,12 +208,27 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
           <SectionIntro eyebrow={copy.eyebrow} title={copy.title} body={copy.body} />
         </div>
         <form className="booking-form api-booking-form" onSubmit={submit} noValidate>
-          <div className="field">
-            <label htmlFor="api-vehicle">{copy.vehicle}</label>
-            <select id="api-vehicle" value={vehicle} onChange={(event) => setVehicle(event.target.value as VehicleId)}>
-              {vehicleTypes.map((item) => <option key={item.id} value={item.id}>{common.estimator.vehicles[item.id]}</option>)}
-            </select>
-          </div>
+          <fieldset className="booking-vehicle-picker vehicle-picker">
+            <legend>{copy.vehicle}</legend>
+            <p>{copy.vehicleHelp}</p>
+            <div className="vehicle-grid">
+              {vehicleTypes.map((item) => (
+                <label key={item.id} className={vehicle === item.id ? 'is-selected' : ''}>
+                  <input
+                    type="radio"
+                    name="booking-vehicle-type"
+                    value={item.id}
+                    checked={vehicle === item.id}
+                    onChange={() => setVehicle(item.id)}
+                  />
+                  <span className="vehicle-picker__check">{vehicle === item.id && <Check size={14} aria-hidden="true" />}</span>
+                  <strong>{common.estimator.vehicles[item.id]}</strong>
+                  <small>{common.estimator.vehicleExample[item.id]}</small>
+                  <em>×{new Intl.NumberFormat(common.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.multiplier)}</em>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <fieldset className="booking-services">
             <legend>{copy.package}</legend>
@@ -240,6 +259,16 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
             </fieldset>
           )}
 
+          {(selectedPackage || selectedServices.length > 0) && (
+            <div className="booking-estimate booking-estimate--live" aria-live="polite">
+              <div><span>{common.estimator.subtotal}</span><strong>{formatPrice(bookingPrice.baseTotal * 100)}</strong></div>
+              <div><span>{common.estimator.sizeAdjustment}</span><strong>× {new Intl.NumberFormat(common.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(bookingPrice.multiplier)}</strong></div>
+              <div className="booking-estimate__total"><span>{common.estimator.estimatedTotal}</span><strong>{formatPrice(state.status === 'ready' ? state.serverPriceCents : clientPriceCents)}</strong></div>
+              {serverDiffers && <small>{copy.authoritative}</small>}
+              <small>{common.estimator.disclaimer}</small>
+            </div>
+          )}
+
           <div className="field">
             <label htmlFor="api-date">{copy.date}</label>
             <input id="api-date" type="date" min={getLocalDate()} value={date} onChange={(event) => { setDate(event.target.value); setFieldErrors((current) => ({ ...current, date: undefined })) }} aria-invalid={Boolean(fieldErrors.date)} aria-describedby={fieldErrors.date ? 'api-date-error' : undefined} />
@@ -263,9 +292,7 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
 
           {state.status === 'ready' && (
             <div className="booking-estimate">
-              <div><span>{copy.serverEstimate}</span><strong>{formatPrice(state.serverPriceCents)}</strong></div>
               <div><span>{copy.duration}</span><strong>{state.serverDurationMinutes / 60} {copy.hours}</strong></div>
-              {serverDiffers && <small>{copy.authoritative}</small>}
             </div>
           )}
 

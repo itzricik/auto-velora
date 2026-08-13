@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   calculateEstimate,
+  calculatePackagePrice,
   getPackageConsistencyIssues,
   packages,
   vehicleTypes,
@@ -34,6 +35,19 @@ describe('pricing', () => {
   it('keeps package prices positive and below their included base services', () => {
     expect(packages.map((item) => item.price)).toEqual([89, 279, 549])
     expect(getPackageConsistencyIssues()).toEqual([])
+  })
+
+  it('applies the selected vehicle multiplier to package prices', () => {
+    expect(calculatePackagePrice('restore', 'compact')).toMatchObject({
+      baseTotal: 279,
+      multiplier: 1,
+      estimatedTotal: 279,
+    })
+    expect(calculatePackagePrice('restore', 'large')).toMatchObject({
+      baseTotal: 279,
+      multiplier: 1.4,
+      estimatedTotal: 391,
+    })
   })
 
   it('deduplicates service IDs before calculating totals', () => {
