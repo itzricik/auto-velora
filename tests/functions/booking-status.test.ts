@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import handler from './booking-status'
+import handler from '../../netlify/functions/booking-status'
 
 describe('public booking status endpoint', () => {
   beforeEach(() => {

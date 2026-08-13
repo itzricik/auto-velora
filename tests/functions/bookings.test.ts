@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import handler from './create-booking'
+import handler from '../../netlify/functions/create-booking'
 
 function request(body: Record<string, unknown>) {
   return new Request('https://autodetailing-velora.netlify.app/api/create-booking', {
