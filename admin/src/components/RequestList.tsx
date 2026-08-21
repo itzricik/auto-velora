@@ -22,7 +22,7 @@ export function RequestList({ requests, search, onSearch, onOpen }: {
       <div className="request-grid">
         {requests.map((request) => (
           <article className="request-card" key={request.id}>
-            <div className="request-card__top"><span className="status status-pending">pending</span><strong>{request.reference}</strong></div>
+            <div className="request-card__top"><span className={`status status-${request.status}`}>{request.status === 'expired' ? 'hold expired' : request.status}</span><strong>{request.reference}</strong></div>
             <h3>{request.customer.full_name}</h3>
             <p>{request.vehicle.make_model} · {request.vehicle.vehicle_type}</p>
             <p>{request.services.map((service) => service.service_name_snapshot).join(', ')}</p>

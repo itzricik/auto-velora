@@ -77,6 +77,7 @@ h1, h2, h3, .brand strong { font-family: "Arial Narrow", Inter, ui-sans-serif, s
 .status { display: inline-flex; padding: .3rem .55rem; border: 1px solid var(--border); color: var(--muted); font-size: .72rem; font-weight: 600; text-transform: capitalize; }
 .status-available { color: #b8dbc3; border-color: rgba(104,165,124,.4); background: rgba(104,165,124,.08); }
 .status-pending { color: #e9ba8f; border-color: rgba(200,132,82,.45); background: rgba(200,132,82,.09); }
+.status-expired { color: #d7b4a9; border-color: rgba(180,120,102,.42); background: rgba(180,120,102,.08); }
 .status-confirmed { color: #b7caed; border-color: rgba(108,139,194,.45); background: rgba(108,139,194,.08); }
 .status-in_progress { color: #eed58f; border-color: rgba(203,169,77,.45); }
 .status-completed { color: #c3c6cb; }

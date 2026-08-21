@@ -7,12 +7,13 @@ const requestList = readFileSync(new URL('./components/RequestList.tsx', import.
 
 describe('admin incoming request queue', () => {
   it('includes scheduled pending requests submitted by the public website', () => {
-    assert.match(repository, /status=eq\.pending&source=eq\.public_website/)
+    assert.match(repository, /status=in\.\(pending,expired\)&source=eq\.public_website/)
     assert.doesNotMatch(repository, /status=eq\.pending&starts_at=is\.null/)
   })
 
-  it('describes scheduled requests as awaiting confirmation', () => {
+  it('describes scheduled and expired-hold requests as awaiting confirmation', () => {
     assert.match(requestList, /Awaiting confirmation/)
     assert.match(requestList, /Review request/)
+    assert.match(requestList, /hold expired/)
   })
 })
