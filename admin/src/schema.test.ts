@@ -7,6 +7,7 @@ const engine = readFileSync(new URL('../../supabase/migrations/20260814095137_sc
 const fixes = readFileSync(new URL('../../supabase/migrations/20260814101233_scheduling_engine_fixes.sql', import.meta.url), 'utf8')
 const safety = readFileSync(new URL('../../supabase/migrations/20260814101413_scheduling_defaults_and_package_safety.sql', import.meta.url), 'utf8')
 const transactionFix = readFileSync(new URL('../../supabase/migrations/20260814102055_fix_admin_transaction_ambiguity.sql', import.meta.url), 'utf8')
+const repeatCustomerFix = readFileSync(new URL('../../supabase/migrations/20260821185228_fix_repeat_customer_booking.sql', import.meta.url), 'utf8')
 
 describe('duration scheduling database guarantees', () => {
   it('creates three independent work bays and configurable calendar exceptions', () => {
@@ -57,5 +58,12 @@ describe('duration scheduling database guarantees', () => {
   it('updates reservations transactionally without ambiguous output-column references', () => {
     assert.match(transactionFix, /delete from public\.reservation_segments old_segments/i)
     assert.match(transactionFix, /update public\.reservation_segments old_segments/i)
+  })
+
+  it('atomically reuses a returning customer during scheduled reservation creation', () => {
+    assert.match(repeatCustomerFix, /on conflict \(normalized_email, normalized_phone\)/i)
+    assert.match(repeatCustomerFix, /returning id into v_customer_id/i)
+    assert.match(repeatCustomerFix, /security invoker/i)
+    assert.doesNotMatch(repeatCustomerFix, /security definer/i)
   })
 })

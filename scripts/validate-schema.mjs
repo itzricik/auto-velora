@@ -11,6 +11,7 @@ const schedulingEngine = readFileSync('supabase/migrations/20260814095137_schedu
 const schedulingFixes = readFileSync('supabase/migrations/20260814101233_scheduling_engine_fixes.sql', 'utf8').toLowerCase()
 const schedulingSafety = readFileSync('supabase/migrations/20260814101413_scheduling_defaults_and_package_safety.sql', 'utf8').toLowerCase()
 const adminTransactionFix = readFileSync('supabase/migrations/20260814102055_fix_admin_transaction_ambiguity.sql', 'utf8').toLowerCase()
+const repeatCustomerFix = readFileSync('supabase/migrations/20260821185228_fix_repeat_customer_booking.sql', 'utf8').toLowerCase()
 
 const requiredTables = [
   'customers',
@@ -95,6 +96,11 @@ const requiredAdminTransactionFix = [
   'update public.reservation_segments old_segments',
   'reservation_completed_capacity_retained',
 ]
+const requiredRepeatCustomerFix = [
+  'on conflict (normalized_email, normalized_phone)',
+  'returning id into v_customer_id',
+  'security invoker',
+]
 
 const missing = [
   ...requiredSchema.filter((value) => !schema.includes(value)),
@@ -107,6 +113,7 @@ const missing = [
   ...requiredSchedulingFixes.filter((value) => !schedulingFixes.includes(value)),
   ...requiredSchedulingSafety.filter((value) => !schedulingSafety.includes(value)),
   ...requiredAdminTransactionFix.filter((value) => !adminTransactionFix.includes(value)),
+  ...requiredRepeatCustomerFix.filter((value) => !repeatCustomerFix.includes(value)),
 ]
 
 if (missing.length) {
