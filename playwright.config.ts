@@ -21,9 +21,20 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
     },
   ],
-  webServer: {
-    command: 'npm run dev -- --mode e2e --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: true,
-  },
+  webServer: [
+    {
+      command: 'node scripts/e2e-web-server.mjs public',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: false,
+    },
+    {
+      command: 'node scripts/e2e-web-server.mjs admin',
+      url: 'http://127.0.0.1:4174',
+      reuseExistingServer: false,
+      env: {
+        VITE_SUPABASE_URL: 'https://supabase.test',
+        VITE_SUPABASE_ANON_KEY: 'public-e2e-anon-key',
+      },
+    },
+  ],
 })

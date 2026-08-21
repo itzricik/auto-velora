@@ -3,36 +3,43 @@ import { expect, test } from 'playwright/test'
 const reference = 'VEL-2030-ABCDEFGH'
 const accessToken = 'test-access-token-which-is-longer-than-32-characters'
 const slot = {
-  start: '2030-01-02T07:00:00.000Z',
-  end: '2030-01-02T09:00:00.000Z',
-  displayTime: '09:00',
+  start: '2030-01-02T08:00:00.000Z',
+  end: '2030-01-02T10:00:00.000Z',
+  displayTime: '10:00',
   estimatedDurationMinutes: 120,
   availableBayCount: 1,
+  segments: [{
+    start: '2030-01-02T08:00:00.000Z',
+    end: '2030-01-02T10:00:00.000Z',
+    durationMinutes: 120,
+  }],
+  continuesNextWorkingDay: false,
 }
 
-test('completes a manual booking without persisting customer data', async ({ page }) => {
+test('creates a duration-based booking without persisting customer data', async ({ page }) => {
   let submitted: Record<string, unknown> | undefined
 
   await page.route('**/api/availability?**', async (route) => {
     await route.fulfill({
       json: {
         slots: [slot],
-        serverEstimate: { priceCents: 4950, durationMinutes: 132 },
+        nearest: slot,
+        serverEstimate: { priceCents: 4950, durationMinutes: 120 },
         requestId: 'availability-request',
       },
     })
   })
-  await page.route('**/api/create-booking', async (route) => {
+  await page.route('**/api/create-reservation', async (route) => {
     submitted = route.request().postDataJSON() as Record<string, unknown>
     await route.fulfill({
       status: 201,
       json: {
         reference,
-        status: 'new',
+        status: 'pending',
         start: slot.start,
         end: slot.end,
         serverPriceCents: 4950,
-        serverDurationMinutes: 132,
+        serverDurationMinutes: 120,
         message: 'Your booking request is awaiting studio confirmation.',
         requestId: 'booking-request',
       },
@@ -43,20 +50,30 @@ test('completes a manual booking without persisting customer data', async ({ pag
   const serviceCheckbox = page.getByRole('checkbox', { name: 'Signature Exterior', exact: true })
   await serviceCheckbox.locator('..').click()
   await expect(serviceCheckbox).toBeChecked()
+  await expect(page.getByText('10:00', { exact: false }).first()).toBeVisible()
+  await page.getByRole('button', { name: 'Choose another date and time' }).click()
   await page.getByLabel('Date').fill('2030-01-02')
-  await page.getByRole('button', { name: '09:00' }).click()
+  const timeChoice = page.getByRole('radio', { name: /10:00/ })
+  await timeChoice.locator('..').click()
+  await expect(timeChoice).toBeChecked()
   await page.getByLabel('Full name').fill('A Test Customer')
   await page.getByLabel('Phone').fill('+371 20 000 001')
   await page.getByLabel('Email').fill('customer@example.test')
   await page.getByLabel('Vehicle make and model').fill('Test vehicle')
   await page.getByText('I agree to the configured privacy notice').click()
-  await page.getByRole('button', { name: 'Request this time' }).click()
+  await page.getByRole('button', { name: 'Send booking request' }).click()
 
-  await expect(page.getByRole('heading', { name: 'Booking request created' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Booking request received' })).toBeVisible()
   await expect(page.getByText(reference)).toBeVisible()
   expect(submitted).toBeDefined()
+  expect(submitted).toMatchObject({
+    requestedStart: slot.start,
+    overnightAcknowledged: false,
+    consentAccepted: true,
+  })
   expect(submitted).not.toHaveProperty('estimatedPrice')
   expect(submitted).not.toHaveProperty('finalPrice')
+  expect(submitted).not.toHaveProperty('serverPriceCents')
 
   const storage = await page.evaluate(() => ({
     local: { ...localStorage },
@@ -80,7 +97,7 @@ test('loads a token-protected booking, removes credentials from the URL and canc
         start: slot.start,
         end: slot.end,
         estimatedPriceCents: 4950,
-        estimatedDurationMinutes: 132,
+        estimatedDurationMinutes: 120,
         vehicleDescription: 'Test vehicle',
         services: [{ service_name_snapshot: 'Signature Exterior' }],
         canCancel: true,
