@@ -77,7 +77,7 @@ export async function schedule(db: Database, scheduleDate: string) {
 }
 
 export async function newRequests(db: Database, search: string) {
-  const reservations = await db.request<ReservationRow[]>(`/rest/v1/reservations?status=eq.pending&starts_at=is.null&select=${reservationSelect}&order=created_at.desc&limit=200`)
+  const reservations = await db.request<ReservationRow[]>(`/rest/v1/reservations?status=eq.pending&source=eq.public_website&select=${reservationSelect}&order=created_at.desc&limit=200`)
   const details = await assemble(db, reservations)
   const query = search.trim().toLocaleLowerCase('en')
   if (!query) return details

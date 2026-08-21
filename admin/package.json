@@ -7,7 +7,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty false",
-    "test": "node --experimental-strip-types --test src/schedule.test.ts src/schema.test.ts",
+    "test": "node --experimental-strip-types --test src/schedule.test.ts src/schema.test.ts src/requests.test.ts",
     "build": "tsc -b && vite build --configLoader runner",
     "preview": "vite preview --configLoader runner"
   },
