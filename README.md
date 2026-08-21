@@ -1,194 +1,141 @@
 # VELORA Detail Lab
 
-Portfolio website for a fictional premium automotive detailing studio in Riga. It uses React, TypeScript, Vite, Lucide icons and hand-authored CSS.
+Production-ready Supabase booking backend for the existing VELORA React website. The storefront design, responsive behavior, price estimator, and EN/LV/RU content are preserved.
 
-Public portfolio URL: <https://auto-velora.netlify.app/>
+Public site: <https://autodetailing-velora.netlify.app/>
 
-The public booking interface currently runs only as a demonstration. Information entered into it is validated in the browser but is not sent or stored, and no real reservation is created.
+## Architecture
+
+```mermaid
+flowchart LR
+  Customer[Customer browser] -->|same-origin JSON| Netlify[Netlify Functions]
+  Admin[Separate admin browser] -->|Supabase Auth token| AdminNetlify[Admin Netlify Functions]
+  Admin -->|password and refresh grants| Auth[Supabase Auth]
+  Netlify -->|service role, server only| Database[Supabase PostgreSQL]
+  AdminNetlify -->|service role, server only| Database
+  Database -->|RLS deny by default| Database
+```
+
+- `src/` contains the visually unchanged storefront and its API booking form.
+- `netlify/functions/create-reservation.ts` is the public booking write boundary.
+- `admin/` is the separate authenticated React application and its own Netlify Functions.
+- `supabase/migrations/` creates the schema, RLS, atomic rate limits, transactional booking insertion, and audited admin updates.
+- `supabase/seed.sql` loads the vehicle, service, package, bay, and business-hours catalog.
+- `supabase/test-data.sql` is optional fictional data for local or staging testing only.
 
 ## Local setup
 
-Requirements: Node.js 20 or newer and npm.
-
 ```bash
 npm ci
+copy .env.example .env
 npm run dev
 ```
 
-Quality checks:
+Do not commit `.env`. The production booking path is the default; use `VITE_SUBMISSION_MODE=demo` only for isolated frontend work.
+
+Verification:
 
 ```bash
 npm run lint
 npm run test
+npm run test:vitest
+npm run test:schema
 npm run build
-npm run preview
+npm --prefix admin run lint
+npm --prefix admin run typecheck
+npm --prefix admin run test
+npm --prefix admin run build
 ```
 
-The production output is generated in `dist/`.
+## Supabase setup
 
-## Branch workflow
+Apply the files in order to the existing Supabase project. The first and third
+migrations preserve and upgrade records from the earlier Phase 2 schema when it
+is present; they are safe no-ops for a new project:
 
-- `main` is the current production source and must not receive Phase 1 work directly.
-- `professional-upgrade` is based on `main` and contains reviewed stabilization work.
-- `professional-upgrade-backup` permanently preserves the old unrelated branch history.
+1. `202608130000_prepare_legacy_phase2.sql`
+2. `202608130001_booking_schema.sql`
+3. `202608130002_copy_legacy_phase2.sql`
+4. `202608130003_booking_functions.sql`
+5. `202608130004_admin_functions.sql`
+6. `20260813173207_admin_schedule_v2.sql`
+7. `20260813173324_admin_schedule_indexes_v2.sql`
+8. `20260813174644_reservation_no_show_status.sql`
+9. `20260813174652_reservation_no_show_function.sql`
+10. `20260814084614_duration_based_scheduling.sql`
+11. `20260814092056_duration_scheduling_hardening.sql`
+12. `20260814095124_reservation_expired_status.sql`
+13. `20260814095137_scheduling_engine_completion.sql`
+14. `20260814101233_scheduling_engine_fixes.sql`
+15. `20260814101413_scheduling_defaults_and_package_safety.sql`
+16. `20260814102055_fix_admin_transaction_ambiguity.sql`
+17. `supabase/seed.sql`
 
-Develop and validate on `professional-upgrade`. Open a review before merging. Do not force-push or deploy `main` as part of Phase 1.
-
-## Public configuration
-
-All public business and policy values are centralized in `src/config/site.ts`.
-
-The following values must be supplied by the business owner before commercial launch:
-
-- booking email;
-- phone display value;
-- phone `tel:` value;
-- Riga studio address;
-- Instagram URL;
-- privacy contact;
-- data-controller identity;
-- data-retention period.
-
-The configuration also owns:
-
-- business name;
-- public website URL;
-- submission mode;
-- consent policy version;
-- pricing version;
-- Google Forms action and field mappings.
-
-Unknown values are `null` in configuration and render as clearly marked required configuration. Do not replace them with invented contact details.
-
-No environment variables or secrets are currently used, so there is no `.env.example`.
-
-## Pricing
-
-`src/pricing.ts` is the source of truth for service prices, durations, vehicle multipliers, package prices, package service selections and pricing calculations. The estimator and booking summary both use `calculateEstimate`.
-
-Prices shown in the browser are non-authoritative client-side estimates. The studio must inspect the vehicle and separately confirm the final scope and price.
-
-## Booking request behavior
-
-`submissionMode` is typed as `'demo' | 'googleForms'` and defaults to `'demo'`.
-
-In demo mode, the form:
-
-- runs all client-side validation and pricing;
-- generates a demonstration `VEL-YYYY-XXXXXXXX` reference;
-- shows the selected services, estimated price and time, and preferred date;
-- does not call `fetch` or the Google Forms transport;
-- does not save personal data to local storage, session storage or cookies;
-- clears personal form values after producing the non-personal summary;
-- states that no request was transmitted, stored or converted into a real reservation.
-
-Only the language preference is stored in `localStorage`; form values are never stored there.
-
-The Google Forms path remains isolated in `src/booking/googleForms.ts`. If `submissionMode` is deliberately changed to `'googleForms'`, the browser attempts a `no-cors` POST after validation. A resolved request cannot prove that Google accepted or stored it, so the interface continues to describe it as pending rather than confirmed.
-
-There is no server-side availability check, authoritative price calculation or double-booking prevention yet.
-
-## Google Forms setup
-
-Do not enable Google Forms for public use until a real owner has supplied every required business and privacy value, confirmed the legal basis and retention policy, reviewed the processor relationship, and approved the customer-facing privacy notice.
-
-Temporary enablement process:
-
-1. Complete all required values in `src/config/site.ts`.
-2. Confirm the real form action, required questions and linked-sheet access.
-3. Add the optional questions below and copy their actual `entry.*` IDs.
-4. Obtain appropriate privacy/legal review.
-5. Change `submissionMode` from `'demo'` to `'googleForms'`.
-6. Validate the flow in a Netlify Deploy Preview with non-personal test data before considering a production change.
-
-The existing form mappings in `src/config/site.ts` cover:
-
-- customer name;
-- normalized phone;
-- email;
-- vehicle description;
-- service names;
-- structured request details in the message field;
-- consent record;
-- language;
-- preferred date.
-
-The structured message includes the request reference, service IDs and names, vehicle category and multiplier, client-side price and duration estimates, pricing version, consent timestamp and consent policy version. This keeps the current form working without inventing unknown Google Form entry IDs.
-
-For cleaner spreadsheet columns, manually add questions to Google Forms for the following values, then copy their real `entry.*` IDs into `googleForms.optionalFields`:
-
-- `requestReference`;
-- `serviceIds`;
-- `vehicleCategory`;
-- `vehicleMultiplier`;
-- `estimatedPrice`;
-- `estimatedDuration`;
-- `pricingVersion`;
-- `consentTimestamp`;
-- `consentPolicyVersion`.
-
-Missing optional mappings are intentionally `null` and do not break submission.
-
-## Privacy
-
-The current demo does not transmit or persist information entered into the booking form. The privacy modal explains the demo behavior and the processing that would apply only after a deliberate switch to Google Forms mode.
-
-Before commercial launch, the owner must confirm the final controller identity, legal basis, privacy contact and retention period, and obtain appropriate legal review. Google Forms and Google Sheets remain third-party processors in the temporary flow.
-
-## Continuous integration
-
-`.github/workflows/ci.yml` runs on:
-
-- pull requests targeting `main`;
-- pushes to `main`;
-- manual workflow dispatch.
-
-The workflow uses Node.js 24, npm caching based on `package-lock.json`, and minimum read-only repository permissions. It runs:
+With the Supabase CLI:
 
 ```bash
-npm ci
-npm run lint
-npm run test
-npm run build
+supabase link --project-ref <PROJECT_REF>
+supabase db push --dry-run
+supabase db push
+supabase db seed
+supabase test db
 ```
 
-Any failed command fails the workflow. The workflow contains no deployment steps.
+`supabase/tests/002_duration_scheduling.sql` verifies the database objects and overlap constraint. The exact ten scheduling scenarios—including overnight transfer, closed days, three-bay capacity, no cross-bay combination, conflict, and Riga DST—are covered by the Vitest scheduling suite. Run Supabase database tests against a disposable local or branch database, not production.
 
-## Netlify
+Create the first administrator in Supabase Auth, disable public sign-up, and then add the Auth UUID:
 
-`netlify.toml` configures:
+```sql
+insert into public.admin_profiles (user_id, role, display_name, active)
+values ('<AUTH_USER_UUID>', 'admin', '<REAL_DISPLAY_NAME>', true);
+```
 
-- build command: `npm run build`;
-- publish directory: `dist`;
-- SPA fallback to `index.html`;
-- CSP, frame, referrer, MIME-sniffing and browser permissions headers.
+## Environment variables
 
-In Netlify, confirm that the production branch remains `main` until the upgrade is reviewed and intentionally merged. Do not deploy `professional-upgrade` to production during Phase 1.
+Set these in Netlify, using the existing Supabase project values:
 
-For review, use a Netlify Deploy Preview attached to the pull request:
+| Variable | Exposure | Required |
+|---|---|---:|
+| `SUPABASE_URL` | Functions | yes |
+| `SUPABASE_ANON_KEY` | Functions | yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Functions secret | yes |
+| `VITE_SUPABASE_URL` | Browser | admin project only |
+| `VITE_SUPABASE_ANON_KEY` | Browser | admin project only |
+| `PUBLIC_SITE_URL` | Functions | yes |
+| `RATE_LIMIT_SECRET` | Functions secret | yes |
+| `BOOKING_APPROVAL_MODE` | Functions | optional, defaults to `manual` |
+| `STUDIO_TIMEZONE` | Functions | optional, defaults to `Europe/Riga` |
+| `BOOKING_MIN_NOTICE_HOURS` | Functions | optional, defaults to `24` |
+| `BOOKING_MAX_DAYS_AHEAD` | Functions | optional, defaults to `90` |
+| `BOOKING_BUFFER_MINUTES` | Functions | optional, defaults to `30` |
+| `TURNSTILE_SECRET_KEY` | Functions secret | optional |
+| `VITE_TURNSTILE_SITE_KEY` | Browser | optional |
 
-1. Confirm the preview was built from the expected pull-request commit.
-2. Verify the demo warning in English, Latvian and Russian.
-3. Complete the form with non-personal test values and confirm the demonstration summary.
-4. Confirm DevTools shows no Google Forms request and no storage of form values.
-5. Check navigation, responsive layouts, accessibility and CSP console output.
-6. Never promote the preview to production from this workflow.
+Never use a `VITE_` prefix for `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`, or a Turnstile secret.
 
-## Current limitations and future migration
+## Security model
 
-Demo mode is safe for the portfolio but is not a reservation system. Google Forms is retained only as a temporary future transport and does not provide:
+- Money is stored in integer euro cents.
+- The server ignores browser prices, reloads active catalog entries, and recalculates totals.
+- Every booking stores service-name, service-price, vehicle-multiplier and calculated-price snapshots. Package bookings also store package name, price, duration, and buffer snapshots.
+- Customer, vehicle, booking, item, history, and admin tables have RLS enabled and no public row policies.
+- The service-role key exists only in Netlify Functions.
+- Booking writes are transactional and idempotent.
+- Three independent bays provide concurrent capacity. Each reservation stays on
+  one bay, is split into Riga-time daily work segments, and continues on the
+  next open day when its duration exceeds the remaining business hours.
+- PostgreSQL exclusion constraints reject overlapping reservation segments or
+  manual blocks for the same bay, including concurrent requests.
+- One private database scheduling engine powers public availability, public
+  creation, admin previews, editing, and rescheduling. Search increments and
+  pending-capacity hold time are configurable in the admin settings.
+- Expired public holds release capacity and append an auditable history entry.
+- Honeypot, body-size limits, field lengths, origin checks, optional Turnstile, and atomic database rate limiting protect the public endpoint.
 
-- a trustworthy application-level delivery acknowledgement;
-- server-side validation;
-- availability locking or double-booking prevention;
-- authenticated staff workflows;
-- controlled retention automation;
-- audit logs or reliable status transitions.
+## Business configuration
 
-Before commercial launch, Google Forms should be replaced by a server-controlled reservation API with a database, transactional availability checks, server-side validation, rate limiting, consent/audit records, staff status management and verified customer notifications. Client-submitted estimates must be recalculated on that server.
+The following remain deliberately unconfigured in `src/config/site.ts`: booking email, phone, Riga address, Instagram URL, privacy contact, data-controller identity, and retention period. Replace these only with real owner-approved values.
 
-## Images and stale artifacts
+The new compact administration application is a separate project under [`admin/`](admin/README.md). See the [separate public/admin deployment guide](docs/separate-admin-deployment.md) for the shared Supabase migration, two-Netlify-project setup, and first-administrator procedure.
 
-The responsive WebP automotive images in `public/images/` were generated for this fictional portfolio project.
-
-The local archive `outputs/velora-detail-lab-netlify.zip` predates this stabilization work, is excluded from Git and must not be used for deployment. Netlify should build from the repository instead.
+See [deployment instructions](docs/deployment.md), [database design](docs/database.md), and the [administrator guide](docs/admin-guide.md).

@@ -11,3 +11,13 @@ work
 *.local
 *.tsbuildinfo
 verification/
+playwright-report/
+test-results/
+
+# Local Codex staging and package-cache directories
+phase1-work/
+.npm-cache/
+.pnpm-store/
+
+node_modules.local-backup/
+node_modules.failed-install/

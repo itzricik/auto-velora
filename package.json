@@ -7,8 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build --configLoader runner",
     "lint": "eslint .",
-    "test": "vitest run",
-    "preview": "vite preview"
+    "typecheck": "tsc -b --pretty false",
+    "test": "node --experimental-strip-types --import ./tests/register.mjs --test tests/*.test.mjs",
+    "test:node": "node --experimental-strip-types --import ./tests/register.mjs --test tests/*.test.mjs",
+    "test:vitest": "vitest run --configLoader runner",
+    "test:api": "vitest run netlify/functions --configLoader runner",
+    "test:e2e": "playwright test",
+    "test:schema": "node scripts/validate-schema.mjs",
+    "preview": "vite preview --configLoader runner"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -24,6 +30,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "playwright": "1.61.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5",
