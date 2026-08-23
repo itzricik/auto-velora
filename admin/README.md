@@ -11,9 +11,11 @@ Separate React + TypeScript administration application for the VELORA Detail Lab
 
 The browser uses the Supabase publishable key only for Auth. Customer and reservation rows are read and changed exclusively through authenticated Netlify Functions. Each function validates the access token and requires an active `admin_profiles` row.
 
-The schedule uses the configured Riga-time start interval across three independent bays. Service and vehicle settings determine duration on the server. Long reservations continue on the same bay on the next open day. Use **Settings** to activate bays, change weekly hours, add closed dates and special hours, configure the start interval and pending hold, and manage service/package durations and buffers.
+The schedule uses the configured Riga-time start interval across three independent bays. Service, package, vehicle and condition settings determine duration and estimate ranges on the server. Long reservations continue on the same bay on the next open day. Use **Settings** to manage capacity, calendar exceptions, live prices/durations, multilingual condition rules, service-comparison content, reusable service-specific checklists, and owner-supplied business/legal information.
 
 The reservation editor previews every daily segment before saving. It can assign the lowest-order available bay automatically, use a selected bay, or apply a reservation-specific final-duration override. Marking a reservation completed retains its planned capacity. Use **Complete and release remaining time** only when the vehicle is actually finished early; the action requires confirmation and writes history.
+
+Reservation details include customer/vehicle history, possible-duplicate review and deliberate audited merge, correction/export/anonymisation actions, checklist progress, and private signed vehicle-photo previews. Content management publishes only deliberate case-study copies and externally sourced verified reviews; private booking photos are never promoted automatically.
 
 ## Netlify project
 

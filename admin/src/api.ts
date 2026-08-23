@@ -1,5 +1,5 @@
 import { accessToken } from './auth'
-import type { AdminIdentity, BusinessHours, BusinessHoursException, Reservation, ReservationInput, ScheduleBlock, SchedulePreview, ScheduleSegment, SchedulingSettings, Service, ServicePackage, VehicleCategory, WorkBay } from './types'
+import type { AdminIdentity, BusinessConfiguration, BusinessHours, BusinessHoursException, ChecklistTemplate, ConditionRule, Reservation, ReservationInput, ScheduleBlock, SchedulePreview, ScheduleSegment, SchedulingSettings, Service, ServicePackage, VehicleCategory, WorkBay } from './types'
 
 export class AdminApiError extends Error {
   constructor(public readonly code: string, public readonly status: number) {
@@ -34,6 +34,8 @@ export function loadSchedule(date: string) {
     startIntervalMinutes: number
     services: Service[]
     vehicleCategories: VehicleCategory[]
+    conditionLevels: ConditionRule[]
+    conditionIndicators: ConditionRule[]
   }>(`/api/schedule?date=${encodeURIComponent(date)}`)
 }
 
@@ -53,7 +55,7 @@ export function saveReservation(input: ReservationInput) {
   })
 }
 
-export function previewReservation(input: Pick<ReservationInput, 'reservationId' | 'vehicleCategoryId' | 'serviceIds' | 'requestedStart' | 'workBayId' | 'finalDurationMinutes'>) {
+export function previewReservation(input: Pick<ReservationInput, 'reservationId' | 'vehicleCategoryId' | 'serviceIds' | 'requestedStart' | 'workBayId' | 'finalDurationMinutes' | 'conditionLevelId' | 'conditionIndicatorIds'>) {
   return request<{ plan: SchedulePreview }>('/api/reservation', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'preview', ...input }),
@@ -90,8 +92,88 @@ export type AdminSettings = {
   services: Service[]
   packages: ServicePackage[]
   scheduling: SchedulingSettings
+  conditionLevels: ConditionRule[]
+  conditionIndicators: ConditionRule[]
+  checklistTemplates: ChecklistTemplate[]
+  business: BusinessConfiguration
 }
 export function loadSettings() { return request<AdminSettings>('/api/settings') }
 export function saveSettings(input: Record<string, unknown>) {
   return request<AdminSettings>('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) })
 }
+
+export function updateChecklist(input: { itemId: string; completed: boolean; note: string }) {
+  return request<{ item: NonNullable<Reservation['checklist']>[number] }>('/api/reservation', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'checklist', ...input }),
+  })
+}
+
+export function addChecklistItem(input: { reservationId: string; label: string; required: boolean }) {
+  return request<{ added: boolean }>('/api/reservation', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'add_checklist_item', ...input }),
+  })
+}
+
+export function removeReservationMedia(mediaId: string) {
+  return request<{ removed: boolean }>('/api/reservation', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'remove_media', mediaId }),
+  })
+}
+
+export function prepareAdminMedia(input: { reservationId: string; filename: string; mimeType: string; fileSize: number; mediaType: 'reference' | 'before' | 'after' }) {
+  return request<{ mediaId: string; uploadUrl: string; uploadToken: string }>('/api/reservation', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'prepare_media', ...input }),
+  })
+}
+
+export function finalizeAdminMedia(mediaId: string) {
+  return request<{ ready: boolean }>('/api/reservation', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'finalize_media', mediaId }),
+  })
+}
+
+export function uploadAdminMedia(upload: { uploadUrl: string; uploadToken: string }, file: File) {
+  return new Promise<void>((resolve, reject) => {
+    const url = new URL(upload.uploadUrl); if (!url.searchParams.has('token')) url.searchParams.set('token', upload.uploadToken)
+    const xhr = new XMLHttpRequest(); xhr.open('POST', url.toString()); xhr.setRequestHeader('Content-Type', file.type); xhr.setRequestHeader('x-upsert', 'false')
+    xhr.addEventListener('load', () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('MEDIA_UPLOAD_FAILED')))
+    xhr.addEventListener('error', () => reject(new Error('MEDIA_UPLOAD_FAILED'))); xhr.send(file)
+  })
+}
+
+export function loadDashboard(date: string) {
+  return request<{
+    todayVehicles: number
+    occupiedBays: number
+    freeBays: number
+    pendingRequests: number
+    confirmedReservations: number
+    completedReservations: number
+    estimatedDailyRevenueCents: number
+    finalCompletedRevenueCents: number
+    checklistAlerts: number
+    notificationFailures: number
+  }>(`/api/dashboard?date=${encodeURIComponent(date)}`)
+}
+
+export function searchHistory(search: string) {
+  return request<{ reservations: Reservation[] }>(`/api/history?search=${encodeURIComponent(search)}`)
+}
+
+export type AdminContent = {
+  caseStudies: Array<Record<string, unknown>>
+  caseMedia: Array<Record<string, unknown>>
+  reviews: Array<Record<string, unknown>>
+}
+export function loadContent() { return request<AdminContent>('/api/content') }
+export function saveContent(input: Record<string, unknown>) { return request<AdminContent>('/api/content', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }) }
+
+export function exportCustomerData(customerId: string) { return request<Record<string, unknown>>(`/api/privacy?customerId=${encodeURIComponent(customerId)}`) }
+export function anonymizeCustomer(customerId: string, reason: string) { return request<{ anonymized: boolean }>('/api/privacy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'anonymize', customerId, reason }) }) }
+export function mergeCustomers(sourceCustomerId: string, targetCustomerId: string) { return request<{ customerId: string }>('/api/privacy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'merge', sourceCustomerId, targetCustomerId }) }) }
+export function correctCustomerVehicle(input: { reservationId: string; customerId: string; vehicleId: string; fullName: string; phone: string; email: string; customerNotes: string; registrationNumber: string; appliedProtection: string; recommendedMaintenanceDate: string; vehicleNotes: string }) { return request<{ corrected: boolean }>('/api/privacy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'correct', ...input }) }) }

@@ -1,6 +1,6 @@
-import { CalendarDays, ChevronLeft, ChevronRight, ClipboardList, LogOut, RefreshCw, Settings } from 'lucide-react'
+import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, ClipboardList, Gauge, History, LogOut, RefreshCw, Settings } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { AdminApiError, loadRequests, loadReservation, loadSchedule, unblockSlot } from './api'
+import { AdminApiError, loadDashboard, loadRequests, loadReservation, loadSchedule, searchHistory, unblockSlot } from './api'
 import { hasSession, signOut } from './auth'
 import { BlockModal } from './components/BlockModal'
 import { LoginPage } from './components/LoginPage'
@@ -8,18 +8,25 @@ import { RequestList } from './components/RequestList'
 import { ReservationModal } from './components/ReservationModal'
 import { ScheduleTable } from './components/ScheduleTable'
 import { SettingsPage } from './components/SettingsPage'
+import { Dashboard, type DashboardMetrics } from './components/Dashboard'
+import { HistoryPage } from './components/HistoryPage'
+import { ContentPage } from './components/ContentPage'
 import { addDays, buildScheduleRows, todayInRiga } from './schedule'
-import type { AdminIdentity, Reservation, ScheduleRow, Service, VehicleCategory, WorkBay } from './types'
+import type { AdminIdentity, ConditionRule, Reservation, ScheduleRow, Service, VehicleCategory, WorkBay } from './types'
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(hasSession)
-  const [view, setView] = useState<'schedule' | 'requests' | 'settings'>('schedule')
+  const [view, setView] = useState<'dashboard' | 'schedule' | 'requests' | 'history' | 'content' | 'settings'>('dashboard')
   const [date, setDate] = useState(todayInRiga)
   const [rows, setRows] = useState<ScheduleRow[]>([])
   const [requests, setRequests] = useState<Reservation[]>([])
+  const [historyRows, setHistoryRows] = useState<Reservation[]>([])
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [categories, setCategories] = useState<VehicleCategory[]>([])
   const [bays, setBays] = useState<WorkBay[]>([])
+  const [conditionLevels, setConditionLevels] = useState<ConditionRule[]>([])
+  const [conditionIndicators, setConditionIndicators] = useState<ConditionRule[]>([])
   const [startIntervalMinutes, setStartIntervalMinutes] = useState(30)
   const [identity, setIdentity] = useState<AdminIdentity | null>(null)
   const [search, setSearch] = useState('')
@@ -53,6 +60,8 @@ export default function App() {
       setServices(result.services)
       setCategories(result.vehicleCategories)
       setBays(result.bays)
+      setConditionLevels(result.conditionLevels)
+      setConditionIndicators(result.conditionIndicators)
       setStartIntervalMinutes(result.startIntervalMinutes)
       setIdentity(result.identity)
     } catch (caught) {
@@ -73,11 +82,23 @@ export default function App() {
     }
   }, [handleError, search, signedIn])
 
+  const refreshDashboard = useCallback(async () => {
+    if (!signedIn) return
+    try { setMetrics(await loadDashboard(date)) } catch (caught) { handleError(caught) }
+  }, [date, handleError, signedIn])
+
+  const refreshHistory = useCallback(async () => {
+    if (!signedIn || view !== 'history') return
+    try { setHistoryRows((await searchHistory(search)).reservations) } catch (caught) { handleError(caught) }
+  }, [handleError, search, signedIn, view])
+
   useEffect(() => { void refreshSchedule() }, [refreshSchedule])
   useEffect(() => {
     const timeout = window.setTimeout(() => void refreshRequests(), 180)
     return () => window.clearTimeout(timeout)
   }, [refreshRequests])
+  useEffect(() => { void refreshDashboard() }, [refreshDashboard])
+  useEffect(() => { const timeout = window.setTimeout(() => void refreshHistory(), 180); return () => window.clearTimeout(timeout) }, [refreshHistory])
 
   const openReservation = async (id: string) => {
     setLoading(true)
@@ -104,8 +125,11 @@ export default function App() {
       <header className="app-header">
         <div className="brand"><strong>VELORA</strong><span>ADMINISTRATION</span></div>
         <nav aria-label="Admin sections">
+          <button className={view === 'dashboard' ? 'active' : ''} onClick={() => setView('dashboard')}><Gauge size={17} /> Dashboard</button>
           <button className={view === 'schedule' ? 'active' : ''} onClick={() => setView('schedule')}><CalendarDays size={17} /> Schedule</button>
           <button className={view === 'requests' ? 'active' : ''} onClick={() => setView('requests')}><ClipboardList size={17} /> New requests <span className="count">{requests.length}</span></button>
+          <button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}><History size={17} /> History</button>
+          <button className={view === 'content' ? 'active' : ''} onClick={() => setView('content')}><BookOpen size={17} /> Content</button>
           <button className={view === 'settings' ? 'active' : ''} onClick={() => setView('settings')}><Settings size={17} /> Settings</button>
         </nav>
         <div className="admin-person"><span>{identity?.displayName ?? 'Administrator'}</span><small>{identity?.role ?? ''}</small></div>
@@ -113,7 +137,7 @@ export default function App() {
       </header>
 
       <main className="content">
-        {view === 'schedule' ? <>
+        {view === 'dashboard' ? <Dashboard metrics={metrics} onSchedule={() => { setDate(todayInRiga()); setView('schedule') }} onRequests={() => setView('requests')} onNew={() => { setDate(todayInRiga()); setCreateAt({ start: `${todayInRiga()}T10:00:00+03:00`, bayId: '' }) }} /> : view === 'schedule' ? <>
           <section className="page-heading">
             <div><p className="eyebrow">Europe/Riga · three work bays</p><h1>Daily schedule</h1><p>Reservations use continuous working time in one bay and may continue on the next open day.</p></div>
             <button className="icon-action" aria-label="Refresh schedule" onClick={() => void refreshSchedule()}><RefreshCw className={loading ? 'spin' : ''} /></button>
@@ -126,7 +150,7 @@ export default function App() {
           </section>
           {error && <p className="error" role="alert">{error}</p>}
           {!loading && !rows.length && !error ? <p className="empty-state">The studio is closed on this date.</p> : <ScheduleTable rows={rows} bays={bays} onCreate={(start, bayId) => setCreateAt({ start, bayId })} onEdit={(id) => void openReservation(id)} onBlock={(start, bayId) => setBlockAt({ start, bayId })} onUnblock={async (id) => { try { await unblockSlot(id); await refreshSchedule() } catch (caught) { handleError(caught) } }} />}
-        </> : view === 'requests' ? <RequestList requests={requests} search={search} onSearch={setSearch} onOpen={(id) => void openReservation(id)} /> : <SettingsPage />}
+        </> : view === 'requests' ? <RequestList requests={requests} search={search} onSearch={setSearch} onOpen={(id) => void openReservation(id)} /> : view === 'history' ? <HistoryPage reservations={historyRows} search={search} onSearch={setSearch} onOpen={(id) => void openReservation(id)} /> : view === 'content' ? <ContentPage /> : <SettingsPage />}
       </main>
 
       {(selected || createAt) && <ReservationModal
@@ -137,6 +161,8 @@ export default function App() {
         services={services}
         vehicleCategories={categories}
         workBays={bays}
+        conditionLevels={conditionLevels}
+        conditionIndicators={conditionIndicators}
         startIntervalMinutes={startIntervalMinutes}
         onClose={() => { setSelected(null); setCreateAt(null) }}
         onSaved={(target) => void saved(target)}

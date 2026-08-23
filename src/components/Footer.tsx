@@ -1,7 +1,9 @@
-import { ArrowUp, Instagram, Mail, MapPin, Phone, X } from 'lucide-react'
+import { ArrowUp, Instagram, Mail, MapPin, MessageCircle, Phone, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { siteConfig } from '../config/site'
 import { translations, type Language } from '../i18n/translations'
+import { fetchPublicCatalog } from '../booking/apiClient'
+import type { PublicCatalog } from '../shared/publicCatalog'
 
 const footerNav = [
   { id: 'services', href: '#services' },
@@ -11,12 +13,40 @@ const footerNav = [
   { id: 'faq', href: '#faq' },
 ] as const
 
+const legalHeadings = {
+  en: { terms: 'Booking terms', cancellation: 'Cancellation policy', photos: 'Vehicle photographs', notice: 'Business privacy notice' },
+  lv: { terms: 'Rezervācijas noteikumi', cancellation: 'Atcelšanas kārtība', photos: 'Transportlīdzekļa fotogrāfijas', notice: 'Uzņēmuma privātuma paziņojums' },
+  ru: { terms: 'Условия записи', cancellation: 'Правила отмены', photos: 'Фотографии автомобиля', notice: 'Уведомление компании о конфиденциальности' },
+} as const
+
 export function Footer({ language }: { language: Language }) {
   const copy = translations[language]
   const [privacyOpen, setPrivacyOpen] = useState(false)
+  const [catalog, setCatalog] = useState<PublicCatalog | null>(null)
   const privacyButtonRef = useRef<HTMLButtonElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const privacyCardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchPublicCatalog(controller.signal).then((value) => {
+      setCatalog(value)
+      const business = value.business
+      const script = document.getElementById('local-business-data')
+      if (business && script) {
+        script.textContent = JSON.stringify({
+          '@context': 'https://schema.org', '@type': 'AutoWash',
+          name: business.public_business_name, url: siteConfig.publicUrl,
+          ...(business.registration_number ? { identifier: business.registration_number } : {}),
+          ...(business.phone ? { telephone: business.phone } : {}),
+          ...(business.email ? { email: business.email } : {}),
+          ...(business.address ? { address: { '@type': 'PostalAddress', streetAddress: business.address, addressLocality: 'Riga', addressCountry: 'LV' } } : {}),
+          openingHoursSpecification: value.businessHours.filter((row) => !row.is_closed && row.opens_at && row.closes_at).map((row) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][row.weekday], opens: row.opens_at?.slice(0, 5), closes: row.closes_at?.slice(0, 5) })),
+        })
+      }
+    }).catch(() => undefined)
+    return () => controller.abort()
+  }, [])
 
   useEffect(() => {
     if (!privacyOpen) return
@@ -55,10 +85,19 @@ export function Footer({ language }: { language: Language }) {
   }
 
   const privacyValues = {
-    controller: siteConfig.dataControllerName ?? siteConfig.requiredConfigurationLabels.dataController,
-    retention: siteConfig.dataRetentionPeriod ?? siteConfig.requiredConfigurationLabels.retentionPeriod,
-    contact: siteConfig.privacyContact ?? siteConfig.requiredConfigurationLabels.privacyContact,
+    controller: catalog?.business?.legal_entity_name ?? 'Business-owned legal identity pending configuration',
+    retention: catalog?.business?.reservation_retention_days ? `${catalog.business.reservation_retention_days} days` : 'Business-owned retention period pending configuration',
+    contact: catalog?.business?.privacy_contact ?? 'Business-owned privacy contact pending configuration',
   }
+  const business = catalog?.business
+  const legalSuffix = language === 'lv' ? 'lv' : language === 'ru' ? 'ru' : 'en'
+  const businessLegal = business ? {
+    terms: business[`booking_terms_${legalSuffix}`],
+    cancellation: business[`cancellation_policy_${legalSuffix}`],
+    photos: business[`photo_processing_${legalSuffix}`],
+    notice: business[`privacy_notice_${legalSuffix}`],
+  } : null
+  const dayNames = language === 'lv' ? ['Sv', 'Pr', 'Ot', 'Tr', 'Ce', 'Pk', 'Se'] : language === 'ru' ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
     <footer className="site-footer">
@@ -66,25 +105,19 @@ export function Footer({ language }: { language: Language }) {
         <div className="footer-brand">
           <a className="wordmark wordmark--footer" href="#top" aria-label="VELORA Detail Lab"><span>VELORA</span><small>DETAIL LAB</small></a>
           <p>{copy.footer.description}</p>
-          <span className="placeholder-note">{copy.footer.placeholder}</span>
         </div>
         <div className="footer-column">
           <h2>{copy.footer.visit}</h2>
-          <p><MapPin size={16} aria-hidden="true" />{siteConfig.address ?? siteConfig.requiredConfigurationLabels.address}</p>
+          {business?.address && (business.map_url ? <a href={business.map_url} target="_blank" rel="noopener noreferrer"><MapPin size={16} aria-hidden="true" />{business.address}</a> : <p><MapPin size={16} aria-hidden="true" />{business.address}</p>)}
           <h2>{copy.footer.hours}</h2>
-          <p>{copy.footer.weekday}<br />{copy.footer.saturday}<br />{copy.footer.sunday}</p>
+          {catalog?.businessHours.filter((row) => !row.is_closed && row.opens_at && row.closes_at).map((row) => <p key={row.weekday}>{dayNames[row.weekday]} · {row.opens_at?.slice(0, 5)}–{row.closes_at?.slice(0, 5)}</p>)}
         </div>
         <div className="footer-column">
           <h2>{copy.footer.contact}</h2>
-          {siteConfig.phoneHref && siteConfig.phoneDisplay
-            ? <a href={`tel:${siteConfig.phoneHref}`}><Phone size={16} aria-hidden="true" />{siteConfig.phoneDisplay}</a>
-            : <p><Phone size={16} aria-hidden="true" />{siteConfig.requiredConfigurationLabels.phone}</p>}
-          {siteConfig.bookingEmail
-            ? <a href={`mailto:${siteConfig.bookingEmail}`}><Mail size={16} aria-hidden="true" />{siteConfig.bookingEmail}</a>
-            : <p><Mail size={16} aria-hidden="true" />{siteConfig.requiredConfigurationLabels.email}</p>}
-          {siteConfig.instagramUrl
-            ? <a href={siteConfig.instagramUrl} target="_blank" rel="noreferrer"><Instagram size={16} aria-hidden="true" />{copy.footer.follow}</a>
-            : <p><Instagram size={16} aria-hidden="true" />{siteConfig.requiredConfigurationLabels.instagram}</p>}
+          {business?.phone && <a href={`tel:${business.phone.replace(/[^+\d]/g, '')}`}><Phone size={16} aria-hidden="true" />{business.phone}</a>}
+          {business?.email && <a href={`mailto:${business.email}`}><Mail size={16} aria-hidden="true" />{business.email}</a>}
+          {business?.instagram_url && <a href={business.instagram_url} target="_blank" rel="noopener noreferrer"><Instagram size={16} aria-hidden="true" />{copy.footer.follow}</a>}
+          {business?.whatsapp_url && <a href={business.whatsapp_url} target="_blank" rel="noopener noreferrer"><MessageCircle size={16} aria-hidden="true" />WhatsApp</a>}
         </div>
         <nav className="footer-nav" aria-label={copy.header.navLabel}>
           {footerNav.map((item) => <a key={item.id} href={item.href}>{copy.header.nav[item.id]}</a>)}
@@ -111,6 +144,10 @@ export function Footer({ language }: { language: Language }) {
               <section><h3>{copy.privacy.retentionTitle}</h3><p>{copy.privacy.retentionBody.replace('{retention}', privacyValues.retention)}</p></section>
               <section><h3>{copy.privacy.rightsTitle}</h3><p>{copy.privacy.rightsBody.replace('{contact}', privacyValues.contact)}</p></section>
               <section><h3>{copy.privacy.statusTitle}</h3><p>{copy.privacy.statusBody}</p></section>
+              {businessLegal?.terms && <section><h3>{legalHeadings[language].terms}</h3><p>{businessLegal.terms}</p></section>}
+              {businessLegal?.cancellation && <section><h3>{legalHeadings[language].cancellation}</h3><p>{businessLegal.cancellation}</p></section>}
+              {businessLegal?.photos && <section><h3>{legalHeadings[language].photos}</h3><p>{businessLegal.photos}</p></section>}
+              {businessLegal?.notice && <section><h3>{legalHeadings[language].notice}</h3><p>{businessLegal.notice}</p></section>}
             </div>
             <p className="privacy-policy__meta">{copy.privacy.controller.replace('{controller}', privacyValues.controller)}<br />{copy.privacy.version.replace('{version}', siteConfig.consentPolicyVersion)}</p>
             <p className="privacy-policy__owner-action">{copy.privacy.ownerAction}</p>

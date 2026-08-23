@@ -2,6 +2,7 @@ import { Armchair, Check, Layers3, RefreshCw, ScanLine, ShieldCheck, Sparkles } 
 import { serviceCards, type ServiceId } from '../data'
 import { translations, type Language } from '../i18n/translations'
 import { SectionIntro } from './SectionIntro'
+import { usePublicCatalog } from '../booking/CatalogContext'
 
 const icons = {
   exterior: Sparkles,
@@ -25,6 +26,7 @@ function formatPrice(value: number, locale: string) {
 
 export function Services({ language, selected, onToggle }: ServicesProps) {
   const copy = translations[language]
+  const { catalog } = usePublicCatalog()
 
   return (
     <section className="section services" id="services">
@@ -32,6 +34,7 @@ export function Services({ language, selected, onToggle }: ServicesProps) {
         <SectionIntro eyebrow={copy.servicesSection.eyebrow} title={copy.servicesSection.title} body={copy.servicesSection.body} />
         <div className="service-grid">
           {serviceCards.map((service, index) => {
+            const live = catalog?.services.find((item) => item.code === service.id)
             const Icon = icons[service.id]
             const isSelected = selected.includes(service.id)
             return (
@@ -43,10 +46,10 @@ export function Services({ language, selected, onToggle }: ServicesProps) {
                 <h3>{copy.serviceNames[service.id]}</h3>
                 <p>{copy.serviceDescriptions[service.id]}</p>
                 <div className="service-card__meta">
-                  <span><small>{copy.common.from}</small>{formatPrice(service.price, copy.locale)}</span>
-                  <span><small>{copy.servicesSection.duration}</small>{copy.serviceDurations[service.id]}</span>
+                  <span><small>{copy.common.from}</small>{live ? formatPrice(live.base_price_cents / 100, copy.locale) : '—'}</span>
+                  <span><small>{copy.servicesSection.duration}</small>{live ? `${Math.round((live.base_duration_minutes + live.buffer_minutes) / 60 * 10) / 10} h` : '—'}</span>
                 </div>
-                <button type="button" className={`text-action ${isSelected ? 'is-selected' : ''}`} onClick={() => onToggle(service.id)}>
+                <button type="button" disabled={!live} className={`text-action ${isSelected ? 'is-selected' : ''}`} onClick={() => onToggle(service.id)}>
                   {isSelected ? <Check size={17} aria-hidden="true" /> : <span aria-hidden="true">＋</span>}
                   {isSelected ? copy.servicesSection.added : copy.servicesSection.add}
                 </button>

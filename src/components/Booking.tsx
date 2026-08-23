@@ -19,6 +19,7 @@ import { translations, type Language } from '../i18n/translations'
 import { calculateEstimate, services, type ServiceId, type VehicleId } from '../pricing'
 import { SectionIntro } from './SectionIntro'
 import { ApiBooking } from './ApiBooking'
+import { usePublicCatalog } from '../booking/CatalogContext'
 
 type BookingProps = {
   language: Language
@@ -46,6 +47,7 @@ export function Booking(props: BookingProps) {
 
 function LegacyBooking({ language, estimatorSelections, estimatorVehicle }: BookingProps) {
   const copy = translations[language]
+  const { catalog } = usePublicCatalog()
   const [values, setValues] = useState<FormValues>(emptyValues)
   const [touched, setTouched] = useState<Partial<Record<BookingField, boolean>>>({})
   const [status, setStatus] = useState<SubmitStatus>('idle')
@@ -57,8 +59,8 @@ function LegacyBooking({ language, estimatorSelections, estimatorVehicle }: Book
   const isDemoMode = siteConfig.submissionMode === 'demo'
   const minDate = useMemo(getLocalDate, [])
   const estimate = useMemo(
-    () => calculateEstimate(values.serviceIds, estimatorVehicle),
-    [estimatorVehicle, values.serviceIds],
+    () => calculateEstimate(values.serviceIds, estimatorVehicle, catalog),
+    [catalog, estimatorVehicle, values.serviceIds],
   )
 
   useEffect(() => {
@@ -108,6 +110,11 @@ function LegacyBooking({ language, estimatorSelections, estimatorVehicle }: Book
       }, 0)
       return
     }
+    if (!catalog) {
+      setStatus('error')
+      setStatusError(copy.booking.errors.generic)
+      return
+    }
 
     const fingerprint = buildSubmissionFingerprint(values)
     if (isDuplicateSubmission(fingerprint, lastSubmission.current, submissionInFlight.current)) {
@@ -137,6 +144,7 @@ function LegacyBooking({ language, estimatorSelections, estimatorVehicle }: Book
         language,
         message: cleanValues.message,
         consentTimestamp,
+        catalog,
       })
       setRequestReference(result.summary.requestReference)
 
@@ -208,7 +216,7 @@ function LegacyBooking({ language, estimatorSelections, estimatorVehicle }: Book
           <fieldset className="booking-services" aria-invalid={Boolean(fieldError('serviceIds'))} aria-describedby={fieldError('serviceIds') ? 'booking-services-error' : undefined}>
             <legend>{copy.booking.services}</legend>
             <div>
-              {services.map((service) => {
+              {services.filter((service) => catalog?.services.some((item) => item.code === service.id)).map((service) => {
                 const checked = values.serviceIds.includes(service.id)
                 return (
                   <label key={service.id} className={checked ? 'is-selected' : ''}>

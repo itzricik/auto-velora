@@ -1,0 +1,8 @@
+import { Search } from 'lucide-react'
+import type { Reservation } from '../types'
+
+export function HistoryPage({ reservations, search, onSearch, onOpen }: { reservations: Reservation[]; search: string; onSearch: (value: string) => void; onOpen: (id: string) => void }) {
+  return <section><div className="panel-heading"><div><p className="eyebrow">Customer and vehicle records</p><h2>Reservation history</h2><p>Search by reference, customer, phone, email, vehicle or registration number.</p></div><label className="search-field"><Search size={17} /><span className="sr-only">Search history</span><input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search history" /></label></div>
+    <div className="history-table-wrap"><table><thead><tr><th>Reference</th><th>Customer</th><th>Vehicle</th><th>Status</th><th>Date</th><th>Value</th></tr></thead><tbody>{reservations.map((row) => <tr key={row.id} tabIndex={0} onClick={() => onOpen(row.id)} onKeyDown={(event) => { if (event.key === 'Enter') onOpen(row.id) }}><td>{row.reference}</td><td><strong>{row.customer.full_name}</strong><small>{row.customer.phone}</small></td><td>{row.vehicle.make_model}</td><td><span className={`status status-${row.status}`}>{row.status.replace('_', ' ')}</span></td><td>{row.starts_at ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'Europe/Riga' }).format(new Date(row.starts_at)) : row.preferred_date}</td><td>€{((row.final_total_cents ?? row.estimated_total_min_cents ?? row.estimated_total_cents) / 100).toFixed(2)}</td></tr>)}</tbody></table>{!reservations.length && <p className="empty-state">No matching history.</p>}</div>
+  </section>
+}

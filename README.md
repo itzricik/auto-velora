@@ -1,6 +1,6 @@
 # VELORA Detail Lab
 
-Production-ready Supabase booking backend for the existing VELORA React website. The storefront design, responsive behavior, price estimator, and EN/LV/RU content are preserved.
+Production-oriented Supabase booking and studio-operations system for the existing VELORA React website. The storefront design and EN/LV/RU experience are preserved while the public catalog, condition estimates, booking availability, customer media and administrator operations use persisted data.
 
 Public site: <https://autodetailing-velora.netlify.app/>
 
@@ -19,7 +19,7 @@ flowchart LR
 - `src/` contains the visually unchanged storefront and its API booking form.
 - `netlify/functions/create-reservation.ts` is the public booking write boundary.
 - `admin/` is the separate authenticated React application and its own Netlify Functions.
-- `supabase/migrations/` creates the schema, RLS, atomic rate limits, transactional booking insertion, and audited admin updates.
+- `supabase/migrations/` creates the schema, explicit deny-by-default RLS policies, atomic rate limits, private media, notification outbox, transactional booking insertion, and audited admin updates.
 - `supabase/seed.sql` loads the vehicle, service, package, bay, and business-hours catalog.
 - `supabase/test-data.sql` is optional fictional data for local or staging testing only.
 
@@ -49,27 +49,7 @@ npm --prefix admin run build
 
 ## Supabase setup
 
-Apply the files in order to the existing Supabase project. The first and third
-migrations preserve and upgrade records from the earlier Phase 2 schema when it
-is present; they are safe no-ops for a new project:
-
-1. `202608130000_prepare_legacy_phase2.sql`
-2. `202608130001_booking_schema.sql`
-3. `202608130002_copy_legacy_phase2.sql`
-4. `202608130003_booking_functions.sql`
-5. `202608130004_admin_functions.sql`
-6. `20260813173207_admin_schedule_v2.sql`
-7. `20260813173324_admin_schedule_indexes_v2.sql`
-8. `20260813174644_reservation_no_show_status.sql`
-9. `20260813174652_reservation_no_show_function.sql`
-10. `20260814084614_duration_based_scheduling.sql`
-11. `20260814092056_duration_scheduling_hardening.sql`
-12. `20260814095124_reservation_expired_status.sql`
-13. `20260814095137_scheduling_engine_completion.sql`
-14. `20260814101233_scheduling_engine_fixes.sql`
-15. `20260814101413_scheduling_defaults_and_package_safety.sql`
-16. `20260814102055_fix_admin_transaction_ambiguity.sql`
-17. `supabase/seed.sql`
+Apply every file in `supabase/migrations/` in filename order. The migrations are additive, preserve the legacy Phase 2 records when present, and include the commercial operations, notification delivery, customer privacy, legal configuration, private storage, and security/index hardening changes. Never edit a migration already applied to a shared project.
 
 With the Supabase CLI:
 
@@ -110,6 +90,11 @@ Set these in Netlify, using the existing Supabase project values:
 | `BOOKING_BUFFER_MINUTES` | Functions | optional, defaults to `30` |
 | `TURNSTILE_SECRET_KEY` | Functions secret | optional |
 | `VITE_TURNSTILE_SITE_KEY` | Browser | optional |
+| `NOTIFICATION_MODE` | Functions | yes: `disabled`, `test`, or `live` |
+| `NOTIFICATION_TEST_RECIPIENT` | Functions | recommended during provider verification |
+| `RESEND_API_KEY` | Functions secret | required only in `live` mode |
+| `RESEND_FROM_EMAIL` | Functions | required only in `live` mode |
+| `BOOKING_OWNER_EMAIL` | Functions | required for administrator notifications in `live` mode |
 
 Never use a `VITE_` prefix for `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`, or a Turnstile secret.
 
@@ -118,7 +103,7 @@ Never use a `VITE_` prefix for `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`,
 - Money is stored in integer euro cents.
 - The server ignores browser prices, reloads active catalog entries, and recalculates totals.
 - Every booking stores service-name, service-price, vehicle-multiplier and calculated-price snapshots. Package bookings also store package name, price, duration, and buffer snapshots.
-- Customer, vehicle, booking, item, history, and admin tables have RLS enabled and no public row policies.
+- Customer, vehicle, booking, item, history, content, notification and admin tables have RLS enabled, explicit server-only deny policies, and no browser table grants.
 - The service-role key exists only in Netlify Functions.
 - Booking writes are transactional and idempotent.
 - Three independent bays provide concurrent capacity. Each reservation stays on
@@ -131,11 +116,13 @@ Never use a `VITE_` prefix for `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`,
   pending-capacity hold time are configurable in the admin settings.
 - Expired public holds release capacity and append an auditable history entry.
 - Honeypot, body-size limits, field lengths, origin checks, optional Turnstile, and atomic database rate limiting protect the public endpoint.
+- Vehicle photographs use a private Storage bucket, path-bound signed uploads, server-side object verification, short-lived signed previews, metadata-stripping browser re-encoding where supported, and audited administrator removal.
+- Notification events are idempotently queued and claimed with `skip locked`; missing provider credentials never break booking.
 
 ## Business configuration
 
-The following remain deliberately unconfigured in `src/config/site.ts`: booking email, phone, Riga address, Instagram URL, privacy contact, data-controller identity, and retention period. Replace these only with real owner-approved values.
+The administrator Settings page is the central source for the public business name, legal entity, registration number, contact actions, address/map, social links, timezone, retention period, booking terms, cancellation policy, privacy notice and photo-processing explanation. Missing owner-supplied values are warned about in admin and hidden cleanly in public; no company facts are invented.
 
 The new compact administration application is a separate project under [`admin/`](admin/README.md). See the [separate public/admin deployment guide](docs/separate-admin-deployment.md) for the shared Supabase migration, two-Netlify-project setup, and first-administrator procedure.
 
-See [deployment instructions](docs/deployment.md), [database design](docs/database.md), and the [administrator guide](docs/admin-guide.md).
+See [commercial operations](docs/commercial-operations.md), [deployment instructions](docs/deployment.md), [database design](docs/database.md), and the [administrator guide](docs/admin-guide.md).

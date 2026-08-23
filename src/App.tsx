@@ -13,6 +13,8 @@ import { Footer } from './components/Footer'
 import { translations, type Language } from './i18n/translations'
 import type { ServiceId, VehicleId } from './pricing'
 import { BookingManager } from './components/BookingManager'
+import { CommercialContent } from './components/CommercialContent'
+import { CatalogProvider } from './booking/CatalogContext'
 
 function getInitialLanguage(): Language {
   const saved = window.localStorage.getItem('velora-language')
@@ -63,13 +65,14 @@ export default function App() {
   }
 
   return (
-    <>
+    <CatalogProvider>
       <a className="skip-link" href="#main-content">{copy.common.skip}</a>
       <Header language={language} onLanguageChange={setLanguage} />
       <main id="main-content">
         <Hero language={language} />
         <Services language={language} selected={selectedServices} onToggle={toggleService} />
         <Estimator language={language} selected={selectedServices} vehicle={vehicle} onVehicleChange={setVehicle} onToggle={toggleService} onContinue={scrollToBooking} />
+        <CommercialContent language={language} />
         <BeforeAfter language={language} />
         <Gallery language={language} />
         <Process language={language} />
@@ -79,6 +82,6 @@ export default function App() {
       </main>
       <Footer language={language} />
       <a className="mobile-sticky-cta" href="#booking">{copy.header.book}</a>
-    </>
+    </CatalogProvider>
   )
 }

@@ -26,7 +26,9 @@ Server-only secrets:
 | Spam | Honeypot, atomic HMAC rate limits, maximum lengths and optional Turnstile | Distributed abuse may require additional edge controls |
 | Admin impersonation | Supabase Auth token plus active server-side admin profile | A successful same-origin XSS could access a browser-held token |
 | Data leakage through logs | Structured allow-list logger; no PII, body, token or authorization header | Netlify and Supabase platform metadata must still be reviewed |
-| Database exposure | RLS on exposed tables; no public policies; public grants revoked | Service-role compromise has broad impact |
+| Database exposure | RLS on exposed tables; explicit `false` policies for browser roles; public grants revoked | Service-role compromise has broad impact |
+| Private image disclosure | Private bucket, signed upload paths, object verification and five-minute admin read URLs | A copied signed URL remains usable until its short expiry |
+| Notification duplication | Unique event idempotency keys plus atomic `skip locked` claims and bounded retries | Provider-side delivery after a network timeout can still be ambiguous |
 | Pending holds | Configurable expiry, opportunistic expiry before planning/schedule operations, released segments and history | A dedicated scheduled expiry job can make release timing proactive even without traffic |
 
 ## Administrator sessions
@@ -40,6 +42,7 @@ The separate admin app uses Supabase Auth and keeps the session in `sessionStora
 The policy permits:
 
 - same-origin Vite/React scripts, styles, fonts, images and API calls;
+- HTTPS images deliberately published as case-study copies (scripts and connections remain origin-restricted);
 - the exact existing Supabase project origin for Auth requests;
 - local data-URI fonts/images used by the site;
 - optional Cloudflare Turnstile script, frame and connection endpoints.

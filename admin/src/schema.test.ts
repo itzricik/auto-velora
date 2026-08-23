@@ -7,7 +7,13 @@ const engine = readFileSync(new URL('../../supabase/migrations/20260814095137_sc
 const fixes = readFileSync(new URL('../../supabase/migrations/20260814101233_scheduling_engine_fixes.sql', import.meta.url), 'utf8')
 const safety = readFileSync(new URL('../../supabase/migrations/20260814101413_scheduling_defaults_and_package_safety.sql', import.meta.url), 'utf8')
 const transactionFix = readFileSync(new URL('../../supabase/migrations/20260814102055_fix_admin_transaction_ambiguity.sql', import.meta.url), 'utf8')
-const repeatCustomerFix = readFileSync(new URL('../../supabase/migrations/20260821185228_fix_repeat_customer_booking.sql', import.meta.url), 'utf8')
+const repeatCustomerFix = readFileSync(new URL('../../supabase/migrations/20260821185826_fix_repeat_customer_booking.sql', import.meta.url), 'utf8')
+const commercial = readFileSync(new URL('../../supabase/migrations/20260823103934_commercial_operations.sql', import.meta.url), 'utf8')
+const notificationDelivery = readFileSync(new URL('../../supabase/migrations/20260823104540_notification_delivery.sql', import.meta.url), 'utf8')
+const commercialTransactions = readFileSync(new URL('../../supabase/migrations/20260823105511_admin_commercial_transactions.sql', import.meta.url), 'utf8')
+const privacyOperations = readFileSync(new URL('../../supabase/migrations/20260823111308_customer_privacy_operations.sql', import.meta.url), 'utf8')
+const customerRecords = readFileSync(new URL('../../supabase/migrations/20260823114740_customer_records_and_legal_terms.sql', import.meta.url), 'utf8')
+const hardening = readFileSync(new URL('../../supabase/migrations/20260823115138_security_and_index_hardening.sql', import.meta.url), 'utf8')
 
 describe('duration scheduling database guarantees', () => {
   it('creates three independent work bays and configurable calendar exceptions', () => {
@@ -65,5 +71,48 @@ describe('duration scheduling database guarantees', () => {
     assert.match(repeatCustomerFix, /returning id into v_customer_id/i)
     assert.match(repeatCustomerFix, /security invoker/i)
     assert.doesNotMatch(repeatCustomerFix, /security definer/i)
+  })
+
+  it('stores condition ranges and immutable calculation snapshots in the booking transaction', () => {
+    assert.match(commercial, /create table public\.reservation_conditions/i)
+    assert.match(commercial, /create_scheduled_reservation_transactional_v3/i)
+    assert.match(commercial, /indicator_snapshots jsonb/i)
+    assert.match(commercialTransactions, /admin_save_duration_reservation_v4/i)
+    assert.match(commercialTransactions, /commercial_overrides_updated/i)
+  })
+
+  it('keeps customer media private and verifies an uploaded object before finalization', () => {
+    assert.match(commercial, /'reservation-media', 'reservation-media', false/i)
+    assert.match(commercial, /revoke all on[\s\S]+public\.reservation_media[\s\S]+from anon, authenticated/i)
+    assert.match(customerRecords, /from storage\.objects/i)
+    assert.match(customerRecords, /uploaded object metadata mismatch/i)
+    assert.match(customerRecords, /revoke all on function public\.finalize_reservation_media_upload/i)
+  })
+
+  it('selects service-specific checklist templates and audits deliberate completion', () => {
+    assert.match(commercial, /service_checklist_templates/i)
+    assert.match(commercial, /when s\.code = 'interior' then 'interior'/i)
+    assert.match(commercial, /CHECKLIST_INCOMPLETE/i)
+    assert.match(commercial, /checklist_item_updated/i)
+  })
+
+  it('documents the server-only RLS boundary and indexes operational foreign keys', () => {
+    assert.match(hardening, /server functions only/i)
+    assert.match(hardening, /for all to anon, authenticated using \(false\) with check \(false\)/i)
+    assert.match(hardening, /reservation_media_uploaded_by_idx/i)
+    assert.match(hardening, /service_checklist_templates_template_idx/i)
+  })
+
+  it('claims outbox rows without duplicate delivery and safely retries failures', () => {
+    assert.match(commercial, /idempotency_key text not null unique/i)
+    assert.match(notificationDelivery, /for update skip locked/i)
+    assert.match(notificationDelivery, /attempt_count < 5/i)
+  })
+
+  it('requires deliberate customer merges and records correction and anonymisation', () => {
+    assert.match(privacyOperations, /admin_merge_customers/i)
+    assert.match(privacyOperations, /customer_merged/i)
+    assert.match(privacyOperations, /active reservations prevent anonymisation/i)
+    assert.match(customerRecords, /customer_vehicle_corrected/i)
   })
 })

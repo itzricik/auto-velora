@@ -14,6 +14,7 @@ describe('Phase 2 shared contracts', () => {
       vehicleDescription: 'Volvo XC60',
       serviceIds: ['22222222-2222-4222-8222-222222222222'],
       requestedStart: '2030-01-02T09:00:00.000Z',
+      condition: { levelId: '55555555-5555-4555-8555-555555555555', indicatorIds: [] },
       language: 'lv',
       consentAccepted: true,
       consentPolicyVersion: '2026-08-supabase-v1',
@@ -49,6 +50,7 @@ describe('Phase 2 shared contracts', () => {
       consentPolicyVersion: '2026-08-supabase-v1',
       idempotencyKey: '33333333-3333-4333-8333-333333333333',
       requestedStart: '2030-01-02T09:00:00.000Z',
+      condition: { levelId: '55555555-5555-4555-8555-555555555555', indicatorIds: [] },
       estimatedPriceCents: 1,
       calculatedDurationMinutes: 1,
     })

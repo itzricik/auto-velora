@@ -1,7 +1,8 @@
-import { Check, LoaderCircle, Send } from 'lucide-react'
+import { Camera, Check, LoaderCircle, RotateCcw, Send, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { packageDatabaseIds, serviceDatabaseIds, vehicleDatabaseIds } from '../booking/apiCatalog'
-import { BookingApiError, createApiReservation, fetchAvailability } from '../booking/apiClient'
+import { BookingApiError, createApiReservation, fetchAvailability, finalizeReservationMedia, uploadReservationMedia } from '../booking/apiClient'
+import { usePublicCatalog } from '../booking/CatalogContext'
+import { prepareVehicleImage } from '../booking/images'
 import { getLocalDate, normalizePhone } from '../booking/validation'
 import { siteConfig } from '../config/site'
 import { apiBookingCopy } from '../i18n/apiBooking'
@@ -27,6 +28,15 @@ type FormValues = {
   company: string
 }
 
+type PhotoUpload = {
+  clientId: string
+  file: File
+  previewUrl: string
+  status: 'pending' | 'uploading' | 'complete' | 'failed'
+  progress: number
+  error?: string
+}
+
 const emptyForm: FormValues = {
   name: '',
   phone: '',
@@ -40,6 +50,7 @@ const emptyForm: FormValues = {
 export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: ApiBookingProps) {
   const copy = apiBookingCopy[language]
   const common = translations[language]
+  const { catalog, status: catalogStatus } = usePublicCatalog()
   const [vehicle, setVehicle] = useState<VehicleId>(estimatorVehicle)
   const [selectedServices, setSelectedServices] = useState<ServiceId[]>(estimatorSelections)
   const [selectedPackage, setSelectedPackage] = useState<PackageId | ''>('')
@@ -50,18 +61,30 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
   const [selectedStart, setSelectedStart] = useState('')
   const [serverDurationMinutes, setServerDurationMinutes] = useState(0)
   const [serverPriceCents, setServerPriceCents] = useState(0)
+  const [serverPriceMaxCents, setServerPriceMaxCents] = useState(0)
+  const [serverDurationMinMinutes, setServerDurationMinMinutes] = useState(0)
+  const [conditionLevelId, setConditionLevelId] = useState('')
+  const [conditionIndicatorIds, setConditionIndicatorIds] = useState<string[]>([])
+  const [conditionNotes, setConditionNotes] = useState('')
+  const [photos, setPhotos] = useState<PhotoUpload[]>([])
+  const [photoError, setPhotoError] = useState('')
   const [overnightAcknowledged, setOvernightAcknowledged] = useState(false)
   const [availabilityStatus, setAvailabilityStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const [availabilityRevision, setAvailabilityRevision] = useState(0)
   const [form, setForm] = useState<FormValues>(emptyForm)
   const [turnstileToken, setTurnstileToken] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormValues | 'services' | 'date' | 'slot' | 'overnight', string>>>({})
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormValues | 'services' | 'date' | 'slot' | 'overnight' | 'condition', string>>>({})
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorCode, setErrorCode] = useState('')
   const [result, setResult] = useState<PublicReservationResult | null>(null)
   const idempotencyKey = useRef('')
+  const conditionLevels = catalog?.conditionLevels ?? []
+  const conditionIndicators = catalog?.conditionIndicators ?? []
 
   useEffect(() => setVehicle(estimatorVehicle), [estimatorVehicle])
+  useEffect(() => {
+    setConditionLevelId((current) => current || catalog?.conditionLevels[0]?.id || '')
+  }, [catalog])
   useEffect(() => {
     if (estimatorSelections.length) {
       setSelectedPackage('')
@@ -71,17 +94,20 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
 
   const clientEstimate = useMemo(() => {
     const serviceIds = selectedPackage
-      ? [...(packages.find((item) => item.id === selectedPackage)?.serviceIds ?? [])]
+      ? calculatePackagePrice(selectedPackage, vehicle, catalog).serviceIds
       : selectedServices
-    return calculateEstimate(serviceIds, vehicle)
-  }, [selectedPackage, selectedServices, vehicle])
+    return calculateEstimate(serviceIds, vehicle, catalog)
+  }, [catalog, selectedPackage, selectedServices, vehicle])
   const bookingPrice = selectedPackage
-    ? calculatePackagePrice(selectedPackage, vehicle)
+    ? calculatePackagePrice(selectedPackage, vehicle, catalog)
     : clientEstimate
   const clientPriceCents = bookingPrice.estimatedTotal * 100
   const availabilityServiceIds = useMemo(() => selectedPackage
     ? []
-    : selectedServices.map((id) => serviceDatabaseIds[id]), [selectedPackage, selectedServices])
+    : selectedServices.flatMap((id) => {
+      const service = catalog?.services.find((item) => item.code === id)
+      return service ? [service.id] : []
+    }), [catalog, selectedPackage, selectedServices])
 
   useEffect(() => {
     setSelectedStart('')
@@ -90,7 +116,9 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
     setNearest(null)
     setServerDurationMinutes(0)
     setServerPriceCents(0)
-    if (!selectedPackage && !selectedServices.length) {
+    setServerPriceMaxCents(0)
+    setServerDurationMinMinutes(0)
+    if ((!selectedPackage && !selectedServices.length) || !conditionLevelId) {
       setAvailabilityStatus('idle')
       return
     }
@@ -99,22 +127,26 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
     const timeout = window.setTimeout(() => {
       fetchAvailability({
         date,
-        vehicleCategoryId: vehicleDatabaseIds[vehicle],
+        vehicleCategoryId: catalog?.vehicleCategories.find((item) => item.code === vehicle)?.id ?? '',
         serviceIds: availabilityServiceIds,
-        packageId: selectedPackage ? packageDatabaseIds[selectedPackage] : undefined,
+        packageId: selectedPackage ? catalog?.packages.find((item) => item.code === selectedPackage)?.id : undefined,
         language,
+        conditionLevelId,
+        conditionIndicatorIds,
       }, controller.signal).then((response) => {
         setSlots(response.slots)
         setNearest(response.nearest)
         setServerDurationMinutes(response.serverEstimate.durationMinutes)
         setServerPriceCents(response.serverEstimate.priceCents)
+        setServerPriceMaxCents(response.serverEstimate.priceMaxCents)
+        setServerDurationMinMinutes(response.serverEstimate.durationMinMinutes)
         setAvailabilityStatus('ready')
       }).catch((error) => {
         if ((error as Error).name !== 'AbortError') setAvailabilityStatus('error')
       })
     }, 180)
     return () => { window.clearTimeout(timeout); controller.abort() }
-  }, [availabilityRevision, availabilityServiceIds, date, language, selectedPackage, selectedServices.length, vehicle])
+  }, [availabilityRevision, availabilityServiceIds, catalog, conditionIndicatorIds, conditionLevelId, date, language, selectedPackage, selectedServices.length, vehicle])
 
   const toggleService = (service: ServiceId) => {
     setSelectedPackage('')
@@ -132,10 +164,72 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
     setForm((current) => ({ ...current, [field]: value }))
   }
 
+  const updatePhoto = (clientId: string, patch: Partial<PhotoUpload>) => {
+    setPhotos((current) => current.map((photo) => photo.clientId === clientId ? { ...photo, ...patch } : photo))
+  }
+
+  const addPhotos = async (files: FileList | null) => {
+    if (!files?.length) return
+    setPhotoError('')
+    const remaining = 6 - photos.length
+    if (files.length > remaining) setPhotoError(copy.photoLimit)
+    for (const original of [...files].slice(0, Math.max(0, remaining))) {
+      try {
+        const file = await prepareVehicleImage(original)
+        const clientId = crypto.randomUUID()
+        setPhotos((current) => [...current, {
+          clientId,
+          file,
+          previewUrl: URL.createObjectURL(file),
+          status: 'pending',
+          progress: 0,
+        }])
+      } catch (error) {
+        setPhotoError(error instanceof Error && error.message === 'IMAGE_TOO_LARGE' ? copy.photoTooLarge : copy.photoInvalid)
+      }
+    }
+  }
+
+  const removePhoto = (clientId: string) => {
+    setPhotos((current) => {
+      const photo = current.find((item) => item.clientId === clientId)
+      if (photo) URL.revokeObjectURL(photo.previewUrl)
+      return current.filter((item) => item.clientId !== clientId)
+    })
+  }
+
+  const uploadOnePhoto = async (
+    upload: PublicReservationResult['mediaUploads'][number],
+    photo: PhotoUpload,
+  ) => {
+    updatePhoto(photo.clientId, { status: 'uploading', progress: 0, error: undefined })
+    try {
+      await uploadReservationMedia(upload, photo.file, (progress) => updatePhoto(photo.clientId, { progress }))
+      await finalizeReservationMedia({ mediaId: upload.mediaId, finalizeToken: upload.finalizeToken })
+      updatePhoto(photo.clientId, { status: 'complete', progress: 100 })
+    } catch {
+      updatePhoto(photo.clientId, { status: 'failed', error: copy.uploadFailed })
+      throw new Error('MEDIA_UPLOAD_FAILED')
+    }
+  }
+
+  const uploadPhotos = async (response: PublicReservationResult) => {
+    const uploadByClient = new Map(response.mediaUploads.map((upload) => [upload.clientId, upload]))
+    await Promise.allSettled(photos.map(async (photo) => {
+      const upload = uploadByClient.get(photo.clientId)
+      if (!upload) {
+        updatePhoto(photo.clientId, { status: 'failed', error: copy.uploadFailed })
+        return
+      }
+      await uploadOnePhoto(upload, photo)
+    }))
+  }
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     const errors: typeof fieldErrors = {}
     if (!selectedPackage && !selectedServices.length) errors.services = copy.validation
+    if (!conditionLevelId) errors.condition = copy.validation
     if (!selectedStart) errors.slot = copy.chooseSlot
     if (form.name.trim().length < 2) errors.name = copy.validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errors.email = copy.validation
@@ -160,10 +254,13 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
         phone: normalizePhone(form.phone),
-        vehicleCategoryId: vehicleDatabaseIds[vehicle],
+        vehicleCategoryId: catalog?.vehicleCategories.find((item) => item.code === vehicle)?.id ?? '',
         vehicleDescription: form.vehicleDescription.trim(),
-        serviceIds: selectedPackage ? [] : selectedServices.map((id) => serviceDatabaseIds[id]),
-        packageId: selectedPackage ? packageDatabaseIds[selectedPackage] : undefined,
+        serviceIds: selectedPackage ? [] : selectedServices.flatMap((id) => {
+          const service = catalog?.services.find((item) => item.code === id)
+          return service ? [service.id] : []
+        }),
+        packageId: selectedPackage ? catalog?.packages.find((item) => item.code === selectedPackage)?.id : undefined,
         requestedStart: selectedStart,
         language,
         customerNotes: form.notes.trim() || undefined,
@@ -173,10 +270,21 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
         company: form.company,
         turnstileToken: turnstileToken || undefined,
         overnightAcknowledged,
+        condition: {
+          levelId: conditionLevelId,
+          indicatorIds: conditionIndicatorIds,
+          notes: conditionNotes.trim() || undefined,
+        },
+        media: photos.map((photo) => ({
+          clientId: photo.clientId,
+          filename: photo.file.name,
+          mimeType: photo.file.type as 'image/jpeg' | 'image/png' | 'image/webp',
+          size: photo.file.size,
+        })),
       })
+      await uploadPhotos(response)
       setResult(response)
       setStatus('success')
-      setForm(emptyForm)
       setOvernightAcknowledged(false)
       setFieldErrors({})
     } catch (error) {
@@ -222,10 +330,22 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
           <p>{result.message}</p>
           <dl className="demo-summary">
             <div><dt>{copy.reference}</dt><dd>{result.reference}</dd></div>
-            <div><dt>{copy.serverEstimate}</dt><dd>{formatPrice(result.serverPriceCents)}</dd></div>
+            <div><dt>{copy.serverEstimate}</dt><dd>{result.estimatedPriceMinCents === result.estimatedPriceMaxCents ? formatPrice(result.estimatedPriceMinCents) : `${formatPrice(result.estimatedPriceMinCents)}–${formatPrice(result.estimatedPriceMaxCents)}`}</dd></div>
             <div><dt>{copy.date}</dt><dd>{new Intl.DateTimeFormat(common.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Riga' }).format(new Date(result.start))}</dd></div>
-            <div><dt>{copy.duration}</dt><dd>{result.serverDurationMinutes % 60 === 0 ? `${result.serverDurationMinutes / 60} ${copy.hours}` : `${result.serverDurationMinutes} ${copy.minutes}`}</dd></div>
+            <div><dt>{copy.duration}</dt><dd>{result.estimatedDurationMinMinutes === result.estimatedDurationMaxMinutes ? `${result.estimatedDurationMaxMinutes} ${copy.minutes}` : `${result.estimatedDurationMinMinutes}–${result.estimatedDurationMaxMinutes} ${copy.minutes}`}</dd></div>
           </dl>
+          {photos.length > 0 && <section className="booking-photo-results" aria-label={copy.photos}>
+            <h3>{copy.photos}</h3>
+            <div className="booking-photo-grid">{photos.map((photo) => {
+              const upload = result.mediaUploads.find((item) => item.clientId === photo.clientId)
+              return <article key={photo.clientId}>
+                <img src={photo.previewUrl} alt="" />
+                <p>{photo.status === 'complete' ? copy.uploadComplete : photo.status === 'uploading' ? copy.uploading.replace('{progress}', String(photo.progress)) : photo.status === 'failed' ? copy.uploadFailed : copy.uploadPending}</p>
+                {photo.status === 'failed' && upload && <button type="button" className="button button--outline" onClick={() => void uploadOnePhoto(upload, photo)}><RotateCcw size={15} /> {copy.retryPhoto}</button>}
+              </article>
+            })}</div>
+          </section>}
+          <p className="condition-disclaimer">{copy.conditionDisclaimer}</p>
           <a className="button button--copper" href="#services">{common.hero.secondary}</a>
         </div>
       </section>
@@ -243,7 +363,9 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
             <legend>{copy.vehicle}</legend>
             <p>{copy.vehicleHelp}</p>
             <div className="vehicle-grid">
-              {vehicleTypes.map((item) => (
+              {vehicleTypes.filter((item) => catalog?.vehicleCategories.some((entry) => entry.code === item.id)).map((item) => {
+                const live = catalog?.vehicleCategories.find((entry) => entry.code === item.id)
+                return (
                 <label key={item.id} className={vehicle === item.id ? 'is-selected' : ''}>
                   <input
                     type="radio"
@@ -255,9 +377,9 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
                   <span className="vehicle-picker__check">{vehicle === item.id && <Check size={14} aria-hidden="true" />}</span>
                   <strong>{common.estimator.vehicles[item.id]}</strong>
                   <small>{common.estimator.vehicleExample[item.id]}</small>
-                  <em>×{new Intl.NumberFormat(common.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.multiplier)}</em>
+                  <em>×{new Intl.NumberFormat(common.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(live?.price_multiplier ?? 0))}</em>
                 </label>
-              ))}
+              )})}
             </div>
           </fieldset>
 
@@ -268,7 +390,7 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
                 <input type="radio" name="package" checked={!selectedPackage} onChange={() => selectPackage('')} />
                 <span>{!selectedPackage && <Check size={13} />}</span>{copy.custom}
               </label>
-              {packages.map((item) => (
+              {packages.filter((item) => catalog?.packages.some((entry) => entry.code === item.id)).map((item) => (
                 <label key={item.id} className={selectedPackage === item.id ? 'is-selected' : ''}>
                   <input type="radio" name="package" checked={selectedPackage === item.id} onChange={() => selectPackage(item.id)} />
                   <span>{selectedPackage === item.id && <Check size={13} />}</span>{item.id}
@@ -281,7 +403,7 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
           {!selectedPackage && (
             <fieldset className="booking-services">
               <legend>{copy.services}</legend>
-              <div>{services.map((service) => (
+              <div>{services.filter((service) => catalog?.services.some((entry) => entry.code === service.id)).map((service) => (
                 <label key={service.id} className={selectedServices.includes(service.id) ? 'is-selected' : ''}>
                   <input type="checkbox" checked={selectedServices.includes(service.id)} onChange={() => toggleService(service.id)} />
                   <span>{selectedServices.includes(service.id) && <Check size={13} />}</span>{common.serviceNames[service.id]}
@@ -290,13 +412,44 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
             </fieldset>
           )}
 
+          <fieldset className="booking-condition">
+            <legend>{copy.conditionTitle}</legend>
+            <p>{copy.conditionHelp}</p>
+            {catalogStatus === 'loading' && <p><LoaderCircle className="spin" size={17} /> {copy.loading}</p>}
+            {catalogStatus === 'error' && <p className="field-error" role="alert">{copy.unavailable}</p>}
+            {catalogStatus === 'ready' && <div className="condition-levels">{conditionLevels.map((level) => {
+              const label = language === 'lv' ? level.label_lv : language === 'ru' ? level.label_ru : level.label_en
+              const explanation = language === 'lv' ? level.explanation_lv : language === 'ru' ? level.explanation_ru : level.explanation_en
+              return <label key={level.id} className={conditionLevelId === level.id ? 'is-selected' : ''}>
+                <input type="radio" name="vehicle-condition" checked={conditionLevelId === level.id} onChange={() => { setConditionLevelId(level.id); setFieldErrors((current) => ({ ...current, condition: undefined })) }} />
+                <span>{conditionLevelId === level.id && <Check size={13} />}</span>
+                <strong>{label}</strong>
+                <small>{explanation}</small>
+              </label>
+            })}</div>}
+            {fieldErrors.condition && <p className="field-error">{fieldErrors.condition}</p>}
+          </fieldset>
+
+          {catalogStatus === 'ready' && conditionIndicators.length > 0 && <fieldset className="booking-services condition-indicators">
+            <legend>{copy.conditionIndicators}</legend>
+            <div>{conditionIndicators.map((indicator) => {
+              const checked = conditionIndicatorIds.includes(indicator.id)
+              const label = language === 'lv' ? indicator.label_lv : language === 'ru' ? indicator.label_ru : indicator.label_en
+              return <label key={indicator.id} className={checked ? 'is-selected' : ''}>
+                <input type="checkbox" checked={checked} onChange={() => setConditionIndicatorIds((current) => checked ? current.filter((id) => id !== indicator.id) : [...current, indicator.id])} />
+                <span>{checked && <Check size={13} />}</span>{label}
+              </label>
+            })}</div>
+          </fieldset>}
+          <div className="field"><label htmlFor="api-condition-notes">{copy.conditionNotes}</label><textarea id="api-condition-notes" maxLength={1000} value={conditionNotes} onChange={(event) => setConditionNotes(event.target.value)} /></div>
+
           {(selectedPackage || selectedServices.length > 0) && (
             <div className="booking-estimate booking-estimate--live" aria-live="polite">
               <div><span>{common.estimator.subtotal}</span><strong>{formatPrice(bookingPrice.baseTotal * 100)}</strong></div>
               <div><span>{common.estimator.sizeAdjustment}</span><strong>× {new Intl.NumberFormat(common.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(bookingPrice.multiplier)}</strong></div>
-              <div className="booking-estimate__total"><span>{common.estimator.estimatedTotal}</span><strong>{formatPrice(serverPriceCents || clientPriceCents)}</strong></div>
-              {serverDurationMinutes > 0 && <div><span>{copy.duration}</span><strong>{serverDurationMinutes} {copy.minutes}</strong></div>}
-              <small>{common.estimator.disclaimer}</small>
+              <div className="booking-estimate__total"><span>{copy.estimatedPriceRange}</span><strong>{serverPriceMaxCents > 0 && serverPriceMaxCents !== serverPriceCents ? `${formatPrice(serverPriceCents)}–${formatPrice(serverPriceMaxCents)}` : formatPrice(serverPriceCents || clientPriceCents)}</strong></div>
+              {serverDurationMinutes > 0 && <div><span>{copy.estimatedDurationRange}</span><strong>{serverDurationMinMinutes !== serverDurationMinutes ? `${serverDurationMinMinutes}–${serverDurationMinutes}` : serverDurationMinutes} {copy.minutes}</strong></div>}
+              <small>{copy.conditionDisclaimer}</small>
             </div>
           )}
 
@@ -357,12 +510,27 @@ export function ApiBooking({ language, estimatorSelections, estimatorVehicle }: 
             <div className="field"><label htmlFor="api-car">{copy.vehicleDescription}</label><input id="api-car" value={form.vehicleDescription} onChange={(event) => updateForm('vehicleDescription', event.target.value)} maxLength={120} required aria-invalid={Boolean(fieldErrors.vehicleDescription)} />{fieldErrors.vehicleDescription && <span className="field-error">{fieldErrors.vehicleDescription}</span>}</div>
           </div>
           <div className="field"><label htmlFor="api-notes">{copy.notes}</label><textarea id="api-notes" value={form.notes} onChange={(event) => updateForm('notes', event.target.value)} maxLength={1500} /></div>
+          <fieldset className="booking-photos">
+            <legend>{copy.photos}</legend>
+            <p>{copy.photosHelp}</p>
+            <label className="photo-input button button--outline">
+              <Camera size={17} /> {copy.addPhotos}
+              <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple disabled={photos.length >= 6} onChange={(event) => { void addPhotos(event.target.files); event.target.value = '' }} />
+            </label>
+            {photoError && <p className="field-error" role="alert">{photoError}</p>}
+            {photos.length > 0 && <div className="booking-photo-grid">{photos.map((photo) => <article key={photo.clientId}>
+              <img src={photo.previewUrl} alt="" />
+              <div className="photo-progress" aria-label={photo.status === 'uploading' ? copy.uploading.replace('{progress}', String(photo.progress)) : copy.uploadPending}><span style={{ width: `${photo.progress}%` }} /></div>
+              <p>{photo.status === 'complete' ? copy.uploadComplete : photo.status === 'uploading' ? copy.uploading.replace('{progress}', String(photo.progress)) : photo.status === 'failed' ? copy.uploadFailed : copy.uploadPending}</p>
+              <button type="button" aria-label={`${copy.removePhoto}: ${photo.file.name}`} onClick={() => removePhoto(photo.clientId)} disabled={photo.status === 'uploading'}><Trash2 size={16} /> {copy.removePhoto}</button>
+            </article>)}</div>}
+          </fieldset>
           <div className="field api-honeypot" aria-hidden="true"><label htmlFor="api-company">{copy.honeypot}</label><input id="api-company" tabIndex={-1} autoComplete="off" value={form.company} onChange={(event) => updateForm('company', event.target.value)} /></div>
           <label className="consent-field"><input type="checkbox" checked={form.consent} onChange={(event) => updateForm('consent', event.target.checked)} /><span className="checkbox-ui">{form.consent && <Check size={15} />}</span><span>{copy.consent}</span></label>
           {fieldErrors.consent && <p className="field-error">{fieldErrors.consent}</p>}
           <TurnstileWidget onTokenChange={setTurnstileToken} />
           {errorMessage && <div role="alert"><p className="field-error">{errorMessage}</p><button type="button" className="button button--outline" onClick={() => { setAvailabilityRevision((current) => current + 1); setStatus('idle') }}>{copy.retry}</button></div>}
-          <button className="button button--copper button--full booking-submit" type="submit" disabled={status === 'submitting'}>
+          <button className="button button--copper button--full booking-submit" type="submit" disabled={status === 'submitting' || catalogStatus !== 'ready'}>
             {status === 'submitting' ? <LoaderCircle className="spin" size={19} /> : <Send size={19} />}
             {status === 'submitting' ? copy.submitting : copy.submit}
           </button>

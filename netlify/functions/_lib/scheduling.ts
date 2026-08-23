@@ -1,6 +1,7 @@
 import type { AvailabilitySlot, BookingLanguage } from '../../../src/shared/contracts'
+import { calculateConditionSnapshot, conditionEstimate } from '../../../src/shared/condition'
 import { calculateServerEstimate } from '../../../src/shared/pricing'
-import { loadCatalogSelection } from './repository'
+import { loadCatalogSelection, loadConditionSelection } from './repository'
 import type { SupabaseServer } from './supabase'
 
 export type SchedulingQuery = {
@@ -10,6 +11,8 @@ export type SchedulingQuery = {
   packageId?: string
   timezone: string
   language: BookingLanguage
+  conditionLevelId: string
+  conditionIndicatorIds: string[]
 }
 
 type DatabasePlan = {
@@ -64,12 +67,18 @@ export async function getAvailableSlots(
   if (query.timezone !== options.studioTimezone) throw new Error('UNSUPPORTED_TIMEZONE')
   const catalog = await loadCatalogSelection(db, query)
   const estimate = calculateServerEstimate(catalog)
+  const conditionRules = await loadConditionSelection(db, {
+    levelId: query.conditionLevelId,
+    indicatorIds: query.conditionIndicatorIds,
+  })
+  const conditionSnapshot = calculateConditionSnapshot({ ...conditionRules, language: query.language })
+  const estimateRange = conditionEstimate(estimate.priceCents, estimate.durationMinutes, conditionSnapshot)
   const now = options.now ?? new Date()
   const notBefore = new Date(now.getTime() + Math.max(0, options.minNoticeHours) * 3_600_000)
   const result = await db.request<DatabaseAvailability>('/rest/v1/rpc/scheduling_availability', {
     method: 'POST',
     body: JSON.stringify({
-      p_duration_minutes: estimate.durationMinutes,
+      p_duration_minutes: estimateRange.durationMaxMinutes,
       p_date: query.localDate ?? null,
       p_not_before: notBefore.toISOString(),
       p_max_days: options.maxDaysAhead,
@@ -78,7 +87,11 @@ export async function getAvailableSlots(
   })
 
   return {
-    estimate,
+    estimate: {
+      ...estimate,
+      ...estimateRange,
+      conditionSnapshot,
+    },
     nearest: result.nearest ? publicPlan(result.nearest, query.language) : null,
     slots: result.slots.map((slot) => publicPlan(slot, query.language)),
   }

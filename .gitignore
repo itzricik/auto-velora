@@ -22,3 +22,4 @@ phase1-work/
 
 node_modules.local-backup/
 node_modules.failed-install/
+supabase/.temp/

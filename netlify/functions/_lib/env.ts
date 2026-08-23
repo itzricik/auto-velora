@@ -60,9 +60,13 @@ export function getOptionalEnvironment(name: string): string | undefined {
 }
 
 export function getNotificationConfig() {
+  const mode = getOptionalEnvironment('NOTIFICATION_MODE') ?? 'disabled'
+  if (!['disabled', 'test', 'live'].includes(mode)) throw new Error('CONFIG_NOTIFICATION_MODE')
   return {
+    mode: mode as 'disabled' | 'test' | 'live',
     apiKey: getOptionalEnvironment('RESEND_API_KEY'),
     fromEmail: getOptionalEnvironment('RESEND_FROM_EMAIL'),
     ownerEmail: getOptionalEnvironment('BOOKING_OWNER_EMAIL'),
+    testRecipient: getOptionalEnvironment('NOTIFICATION_TEST_RECIPIENT'),
   }
 }

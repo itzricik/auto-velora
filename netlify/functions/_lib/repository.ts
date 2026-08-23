@@ -1,4 +1,5 @@
 import type { BookingLanguage, BookingStatus } from '../../../src/shared/contracts'
+import type { ConditionRule } from '../../../src/shared/condition'
 import type { PricingPackage, PricingService, PricingVehicle } from '../../../src/shared/pricing'
 import { inFilter, type SupabaseServer } from './supabase'
 
@@ -118,6 +119,23 @@ export async function loadCatalogSelection(
     vehicle,
     services: uniqueIds.map((id) => pricingService(byId.get(id) as ServiceRow, input.language)),
   }
+}
+
+export async function loadConditionSelection(
+  db: SupabaseServer,
+  input: { levelId: string; indicatorIds: string[] },
+): Promise<{ level: ConditionRule; indicators: ConditionRule[] }> {
+  const select = 'id,code,label_en,label_lv,label_ru,explanation_en,explanation_lv,explanation_ru,min_surcharge_cents,max_surcharge_cents,min_duration_minutes,max_duration_minutes,is_active,sort_order,requires_business_confirmation'
+  const [levels, indicators] = await Promise.all([
+    db.request<ConditionRule[]>(`/rest/v1/condition_levels?id=eq.${input.levelId}&is_active=eq.true&select=${select}&limit=1`),
+    input.indicatorIds.length
+      ? db.request<ConditionRule[]>(`/rest/v1/condition_indicators?id=${inFilter(input.indicatorIds)}&is_active=eq.true&select=${select}`)
+      : Promise.resolve([]),
+  ])
+  if (!levels[0]) throw new Error('UNKNOWN_CONDITION_LEVEL')
+  if (indicators.length !== input.indicatorIds.length) throw new Error('UNKNOWN_CONDITION_INDICATOR')
+  const byId = new Map(indicators.map((row) => [row.id, row]))
+  return { level: levels[0], indicators: input.indicatorIds.map((id) => byId.get(id) as ConditionRule) }
 }
 
 export type TransactionalBooking = {

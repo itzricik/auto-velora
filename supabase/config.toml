@@ -23,7 +23,8 @@ enabled = false
 enabled = false
 
 [storage]
-enabled = false
+enabled = true
+file_size_limit = "8MiB"
 
 [auth]
 enabled = true

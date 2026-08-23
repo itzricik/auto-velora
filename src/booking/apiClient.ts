@@ -1,9 +1,17 @@
 import type { AvailabilitySlot, PublicBookingRequest, PublicBookingResult, PublicReservationRequest, PublicReservationResult } from '../shared/contracts'
+import type { PublicCatalog } from '../shared/publicCatalog'
 
 type AvailabilityResponse = {
   slots: AvailabilitySlot[]
   nearest: AvailabilitySlot | null
-  serverEstimate: { priceCents: number; durationMinutes: number }
+  serverEstimate: {
+    priceCents: number
+    durationMinutes: number
+    priceMinCents: number
+    priceMaxCents: number
+    durationMinMinutes: number
+    durationMaxMinutes: number
+  }
   requestId: string
 }
 
@@ -38,6 +46,8 @@ export async function fetchAvailability(
     serviceIds: string[]
     packageId?: string
     language: string
+    conditionLevelId: string
+    conditionIndicatorIds: string[]
   },
   signal?: AbortSignal,
 ): Promise<AvailabilityResponse> {
@@ -45,16 +55,62 @@ export async function fetchAvailability(
     vehicleCategoryId: query.vehicleCategoryId,
     timezone: 'Europe/Riga',
     language: query.language,
+    conditionLevelId: query.conditionLevelId,
   })
   if (query.date) params.set('date', query.date)
   if (query.packageId) params.set('packageId', query.packageId)
   else params.set('serviceIds', query.serviceIds.join(','))
+  if (query.conditionIndicatorIds.length) params.set('conditionIndicatorIds', query.conditionIndicatorIds.join(','))
   const response = await fetch(`/api/availability?${params}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
   })
   return parseResponse<AvailabilityResponse>(response)
+}
+
+export async function fetchPublicCatalog(signal?: AbortSignal): Promise<PublicCatalog> {
+  const response = await fetch('/api/catalog', { headers: { Accept: 'application/json' }, signal })
+  return parseResponse<PublicCatalog>(response)
+}
+
+export async function finalizeReservationMedia(input: {
+  mediaId: string
+  finalizeToken: string
+}): Promise<void> {
+  const response = await fetch('/api/reservation-media', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ action: 'finalize', ...input }),
+  })
+  await parseResponse(response)
+}
+
+export function uploadReservationMedia(
+  upload: PublicReservationResult['mediaUploads'][number],
+  file: File,
+  onProgress: (percent: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(upload.uploadUrl)
+    if (!url.searchParams.has('token')) url.searchParams.set('token', upload.uploadToken)
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', url.toString())
+    xhr.setRequestHeader('Content-Type', file.type)
+    xhr.setRequestHeader('x-upsert', 'false')
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100))
+    })
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress(100)
+        resolve()
+      } else reject(new BookingApiError(xhr.status, 'MEDIA_UPLOAD_FAILED'))
+    })
+    xhr.addEventListener('error', () => reject(new BookingApiError(0, 'MEDIA_UPLOAD_FAILED')))
+    xhr.addEventListener('abort', () => reject(new DOMException('Upload aborted', 'AbortError')))
+    xhr.send(file)
+  })
 }
 
 export async function createApiBooking(request: PublicBookingRequest): Promise<PublicBookingResult> {

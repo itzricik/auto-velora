@@ -31,7 +31,7 @@ export async function submitBookingRequest(
   dependencies: SubmissionDependencies = {},
 ): Promise<BookingSubmissionResult> {
   const requestReference = dependencies.generateReference?.() ?? generateRequestReference()
-  const estimate = calculateEstimate(input.serviceIds, input.vehicleId)
+  const estimate = calculateEstimate(input.serviceIds, input.vehicleId, input.catalog)
   const summary: BookingSubmissionSummary = {
     requestReference,
     serviceIds: [...input.serviceIds],

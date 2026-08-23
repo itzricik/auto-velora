@@ -33,6 +33,8 @@ export default async function handler(request: Request): Promise<Response> {
     const packageId = url.searchParams.get('packageId') || undefined
     const timezone = url.searchParams.get('timezone') ?? config.studioTimezone
     const languageValue = url.searchParams.get('language') ?? 'en'
+    const conditionLevelId = url.searchParams.get('conditionLevelId') ?? ''
+    const conditionIndicatorIds = (url.searchParams.get('conditionIndicatorIds') ?? '').split(',').filter(Boolean)
 
     if ((localDate && !validLocalDate(localDate))
       || !isUuid(vehicleCategoryId)
@@ -45,6 +47,12 @@ export default async function handler(request: Request): Promise<Response> {
       errorCode = 'INVALID_QUERY'
       return apiError(422, errorCode, 'The availability query is invalid.', id)
     }
+    if (!isUuid(conditionLevelId)
+      || conditionIndicatorIds.length > 8
+      || conditionIndicatorIds.some((value) => !isUuid(value))) {
+      errorCode = 'INVALID_CONDITION_QUERY'
+      return apiError(422, errorCode, 'The condition selection is invalid.', id)
+    }
 
     const db = createSupabaseServer(config.supabaseUrl, config.serviceRoleKey)
     const result = await getAvailableSlots(db, {
@@ -54,14 +62,20 @@ export default async function handler(request: Request): Promise<Response> {
       packageId,
       timezone,
       language: languageValue,
+      conditionLevelId,
+      conditionIndicatorIds,
     }, config)
     resultStatus = 'success'
     return json({
       slots: result.slots,
       nearest: result.nearest,
       serverEstimate: {
-        priceCents: result.estimate.priceCents,
-        durationMinutes: result.estimate.durationMinutes,
+        priceCents: result.estimate.priceMinCents,
+        durationMinutes: result.estimate.durationMaxMinutes,
+        priceMinCents: result.estimate.priceMinCents,
+        priceMaxCents: result.estimate.priceMaxCents,
+        durationMinMinutes: result.estimate.durationMinMinutes,
+        durationMaxMinutes: result.estimate.durationMaxMinutes,
       },
       requestId: id,
     })

@@ -1,7 +1,8 @@
 import type { PublicReservationRequest, PublicReservationResult } from '../../../src/shared/contracts'
+import { calculateConditionSnapshot, conditionEstimate } from '../../../src/shared/condition'
 import { calculateServerEstimate } from '../../../src/shared/pricing'
 import { createSecureReference } from '../../../src/shared/security'
-import { loadCatalogSelection } from './repository'
+import { loadCatalogSelection, loadConditionSelection } from './repository'
 import { SupabaseError, type SupabaseServer } from './supabase'
 
 type TransactionResult = {
@@ -12,7 +13,11 @@ type TransactionResult = {
   ends_at: string
   work_bay_id: string
   estimated_total_cents: number
+  estimated_total_min_cents: number
+  estimated_total_max_cents: number
   calculated_duration_minutes: number
+  calculated_duration_min_minutes: number
+  calculated_duration_max_minutes: number
   was_existing: boolean
 }
 
@@ -50,19 +55,28 @@ export async function createPendingReservation(input: {
     throw new Error('INVALID_REQUESTED_START')
   }
 
-  const catalog = await loadCatalogSelection(input.db, {
+  const [catalog, conditionRules] = await Promise.all([loadCatalogSelection(input.db, {
     vehicleCategoryId: input.request.vehicleCategoryId,
     serviceIds: input.request.serviceIds,
     packageId: input.request.packageId,
     language: input.request.language,
-  })
+  }), loadConditionSelection(input.db, {
+    levelId: input.request.condition.levelId,
+    indicatorIds: input.request.condition.indicatorIds,
+  })])
   const estimate = calculateServerEstimate(catalog)
+  const conditionSnapshot = calculateConditionSnapshot({
+    ...conditionRules,
+    language: input.request.language,
+    notes: input.request.condition.notes,
+  })
+  const estimateRange = conditionEstimate(estimate.priceCents, estimate.durationMinutes, conditionSnapshot)
   const availability = await input.db.request<{
     slots: Array<{ start: string; end: string }>
   }>('/rest/v1/rpc/scheduling_availability', {
     method: 'POST',
     body: JSON.stringify({
-      p_duration_minutes: estimate.durationMinutes,
+      p_duration_minutes: estimateRange.durationMaxMinutes,
       p_date: requestedDate,
       p_not_before: notBefore.toISOString(),
       p_max_days: input.maxDaysAhead,
@@ -89,7 +103,7 @@ export async function createPendingReservation(input: {
   let result: TransactionResult | undefined
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const rows = await input.db.request<TransactionResult[]>('/rest/v1/rpc/create_scheduled_reservation_transactional_v2', {
+      const rows = await input.db.request<TransactionResult[]>('/rest/v1/rpc/create_scheduled_reservation_transactional_v3', {
         method: 'POST',
         body: JSON.stringify({
           p_reference: createSecureReference(now),
@@ -99,8 +113,8 @@ export async function createPendingReservation(input: {
           p_vehicle_category_id: input.request.vehicleCategoryId,
           p_vehicle_description: input.request.vehicleDescription,
           p_requested_start: input.request.requestedStart,
-          p_estimated_total_cents: estimate.priceCents,
-          p_calculated_duration_minutes: estimate.durationMinutes,
+          p_estimated_total_cents: estimateRange.priceMinCents,
+          p_calculated_duration_minutes: estimateRange.durationMaxMinutes,
           p_language: input.request.language,
           p_customer_message: input.request.customerNotes ?? '',
           p_idempotency_key: input.request.idempotencyKey,
@@ -114,6 +128,7 @@ export async function createPendingReservation(input: {
             duration_minutes: catalog.package.baseDurationMinutes,
             buffer_minutes: catalog.package.bufferMinutes ?? 0,
           } : null,
+          p_condition_snapshot: conditionSnapshot,
         }),
       })
       result = rows[0]
@@ -134,6 +149,11 @@ export async function createPendingReservation(input: {
     end: result.ends_at,
     serverPriceCents: result.estimated_total_cents,
     serverDurationMinutes: result.calculated_duration_minutes,
+    estimatedPriceMinCents: result.estimated_total_min_cents,
+    estimatedPriceMaxCents: result.estimated_total_max_cents,
+    estimatedDurationMinMinutes: result.calculated_duration_min_minutes,
+    estimatedDurationMaxMinutes: result.calculated_duration_max_minutes,
+    mediaUploads: [],
     message: messages[input.request.language],
     requestId: input.requestId,
   }

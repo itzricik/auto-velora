@@ -30,6 +30,19 @@ export type PublicBookingRequest = {
   turnstileToken?: string
 }
 
+export type PublicMediaDescriptor = {
+  clientId: string
+  filename: string
+  mimeType: 'image/jpeg' | 'image/png' | 'image/webp'
+  size: number
+}
+
+export type ConditionSelection = {
+  levelId: string
+  indicatorIds: string[]
+  notes?: string
+}
+
 export type PublicBookingResult = {
   reference: string
   status: Extract<BookingStatus, 'new' | 'confirmed'>
@@ -58,6 +71,8 @@ export type PublicReservationRequest = {
   company?: string
   turnstileToken?: string
   overnightAcknowledged: boolean
+  condition: ConditionSelection
+  media?: PublicMediaDescriptor[]
 }
 
 export type PublicReservationResult = {
@@ -67,6 +82,19 @@ export type PublicReservationResult = {
   end: string
   serverPriceCents: number
   serverDurationMinutes: number
+  estimatedPriceMinCents: number
+  estimatedPriceMaxCents: number
+  estimatedDurationMinMinutes: number
+  estimatedDurationMaxMinutes: number
+  mediaUploads: Array<{
+    mediaId: string
+    clientId: string
+    uploadUrl: string
+    uploadToken: string
+    storagePath: string
+    finalizeToken: string
+  }>
+  mediaUploadError?: string
   message: string
   requestId: string
 }
@@ -101,6 +129,8 @@ const LIMITS = {
   vehicle: 120,
   notes: 1500,
   policy: 100,
+  conditionNotes: 1000,
+  mediaFilename: 200,
 } as const
 
 function text(value: unknown): string {
@@ -210,6 +240,28 @@ export function parsePublicReservationRequest(input: unknown): ValidationResult<
   const company = text(source.company)
   const turnstileToken = text(source.turnstileToken)
   const overnightAcknowledged = source.overnightAcknowledged === true
+  const conditionSource = source.condition && typeof source.condition === 'object' && !Array.isArray(source.condition)
+    ? source.condition as Record<string, unknown>
+    : {}
+  const conditionLevelId = text(conditionSource.levelId)
+  const conditionNotes = text(conditionSource.notes)
+  const conditionIndicatorIds = Array.isArray(conditionSource.indicatorIds)
+    ? [...new Set(conditionSource.indicatorIds.filter((value): value is string => typeof value === 'string').map((value) => value.trim()).filter(Boolean))]
+    : []
+  const mediaSource = Array.isArray(source.media) ? source.media : []
+  const media = mediaSource.flatMap((entry): PublicMediaDescriptor[] => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return []
+    const row = entry as Record<string, unknown>
+    const clientId = text(row.clientId)
+    const filename = text(row.filename)
+    const mimeType = text(row.mimeType)
+    const size = Number(row.size)
+    if (!isUuid(clientId)
+      || filename.length < 1 || filename.length > LIMITS.mediaFilename
+      || !['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)
+      || !Number.isInteger(size) || size < 1 || size > 8_388_608) return []
+    return [{ clientId, filename, mimeType: mimeType as PublicMediaDescriptor['mimeType'], size }]
+  })
   const serviceIds = Array.isArray(source.serviceIds)
     ? [...new Set(source.serviceIds.filter((value): value is string => typeof value === 'string').map((value) => value.trim()).filter(Boolean))]
     : []
@@ -231,6 +283,12 @@ export function parsePublicReservationRequest(input: unknown): ValidationResult<
     errors.consentPolicyVersion = 'The consent policy version is invalid.'
   }
   if (!isUuid(idempotencyKey)) errors.idempotencyKey = 'The request identifier is invalid.'
+  if (!isUuid(conditionLevelId)) errors.condition = 'Select a valid vehicle condition.'
+  if (conditionIndicatorIds.length > 8 || conditionIndicatorIds.some((id) => !isUuid(id))) {
+    errors.conditionIndicators = 'One or more condition indicators are invalid.'
+  }
+  if (conditionNotes.length > LIMITS.conditionNotes) errors.conditionNotes = 'Use no more than 1000 characters.'
+  if (mediaSource.length > 6 || media.length !== mediaSource.length) errors.media = 'Choose up to six supported images of 8 MB or less.'
 
   if (Object.keys(errors).length) return { success: false, errors }
 
@@ -253,6 +311,12 @@ export function parsePublicReservationRequest(input: unknown): ValidationResult<
       company: company || undefined,
       turnstileToken: turnstileToken || undefined,
       overnightAcknowledged,
+      condition: {
+        levelId: conditionLevelId,
+        indicatorIds: conditionIndicatorIds,
+        notes: conditionNotes || undefined,
+      },
+      media: media.length ? media : undefined,
     },
   }
 }

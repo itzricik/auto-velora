@@ -9,6 +9,7 @@ import {
 } from '../src/shared/contracts.ts'
 import { calculateServerEstimate } from '../src/shared/pricing.ts'
 import { calculatePackagePrice } from '../src/pricing.ts'
+import { publicCatalogFixture } from './fixtures/publicCatalog.ts'
 import { canTransitionBooking } from '../src/shared/status.ts'
 import { createProfessionalBooking } from '../netlify/functions/_lib/booking-service.ts'
 import { createPendingReservation } from '../netlify/functions/_lib/reservation-service.ts'
@@ -29,8 +30,10 @@ const validRequest = {
   idempotencyKey: '30000000-0000-4000-8000-000000000001',
 }
 
+const conditionLevelId = '70000000-0000-4000-8000-000000000001'
 const validReservationRequest = {
   ...validRequest,
+  condition: { levelId: conditionLevelId, indicatorIds: [] },
 }
 
 describe('public request boundary', () => {
@@ -84,14 +87,15 @@ describe('public request boundary', () => {
 
 describe('authoritative pricing and transaction payload', () => {
   test('previews package totals using the selected vehicle multiplier', () => {
-    assert.deepEqual(calculatePackagePrice('restore', 'compact'), {
+    assert.deepEqual(calculatePackagePrice('restore', 'compact', publicCatalogFixture), {
       packageId: 'restore',
       vehicleId: 'compact',
       multiplier: 1,
       baseTotal: 279,
       estimatedTotal: 279,
+      serviceIds: ['exterior', 'interior', 'correction'],
     })
-    assert.equal(calculatePackagePrice('restore', 'large').estimatedTotal, 391)
+    assert.equal(calculatePackagePrice('restore', 'large', publicCatalogFixture).estimatedTotal, 390.6)
   })
 
   test('calculates integer cents and item snapshots', () => {
@@ -130,6 +134,13 @@ describe('authoritative pricing and transaction payload', () => {
           name_ru: 'Уход за кузовом',
           base_price_cents: 4500,
           base_duration_minutes: 120,
+        }]
+        if (path.startsWith('/rest/v1/condition_levels?code=eq.light')) return [{ id: conditionLevelId }]
+        if (path.startsWith('/rest/v1/condition_levels?id=eq.')) return [{
+          id: conditionLevelId, code: 'light', label_en: 'Light', label_lv: 'Viegls', label_ru: 'Лёгкое',
+          explanation_en: '', explanation_lv: '', explanation_ru: '', min_surcharge_cents: 0,
+          max_surcharge_cents: 0, min_duration_minutes: 0, max_duration_minutes: 0,
+          is_active: true, sort_order: 1, requires_business_confirmation: true,
         }]
         if (path === '/rest/v1/rpc/scheduling_availability') return {
           durationMinutes: 120,
@@ -199,12 +210,18 @@ describe('duration reservation transaction', () => {
         if (path.startsWith('/rest/v1/services')) return [{
           id: validRequest.serviceIds[0], code: 'exterior', name_en: 'Signature Exterior', name_lv: 'Virsbūves kopšana', name_ru: 'Уход за кузовом', base_price_cents: 4500, base_duration_minutes: overnight ? 360 : 120, buffer_minutes: 0,
         }]
+        if (path.startsWith('/rest/v1/condition_levels?id=eq.')) return [{
+          id: conditionLevelId, code: 'light', label_en: 'Light', label_lv: 'Viegls', label_ru: 'Лёгкое',
+          explanation_en: '', explanation_lv: '', explanation_ru: '', min_surcharge_cents: 0,
+          max_surcharge_cents: 0, min_duration_minutes: 0, max_duration_minutes: 0,
+          is_active: true, sort_order: 1, requires_business_confirmation: true,
+        }]
         if (path === '/rest/v1/rpc/scheduling_availability') return {
           slots: [{ start: validRequest.requestedStart, end: overnight ? '2030-01-03T12:00:00.000Z' : '2030-01-02T09:00:00.000Z' }],
         }
-        if (path === '/rest/v1/rpc/create_scheduled_reservation_transactional_v2') {
+        if (path === '/rest/v1/rpc/create_scheduled_reservation_transactional_v3') {
           transactionBody = JSON.parse(init.body)
-          return [{ reservation_id: '60000000-0000-4000-8000-000000000001', reference: 'VEL-2030-ABCDEFGH', status: 'pending', starts_at: validRequest.requestedStart, ends_at: overnight ? '2030-01-03T12:00:00.000Z' : '2030-01-02T09:00:00.000Z', work_bay_id: '40000000-0000-4000-8000-000000000001', estimated_total_cents: 4500, calculated_duration_minutes: overnight ? 360 : 120, was_existing: false }]
+          return [{ reservation_id: '60000000-0000-4000-8000-000000000001', reference: 'VEL-2030-ABCDEFGH', status: 'pending', starts_at: validRequest.requestedStart, ends_at: overnight ? '2030-01-03T12:00:00.000Z' : '2030-01-02T09:00:00.000Z', work_bay_id: '40000000-0000-4000-8000-000000000001', estimated_total_cents: 4500, estimated_total_min_cents: 4500, estimated_total_max_cents: 4500, calculated_duration_minutes: overnight ? 360 : 120, calculated_duration_min_minutes: overnight ? 360 : 120, calculated_duration_max_minutes: overnight ? 360 : 120, was_existing: false }]
         }
         throw new Error(`Unexpected database request: ${path}`)
       },

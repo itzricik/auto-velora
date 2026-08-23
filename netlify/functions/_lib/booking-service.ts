@@ -56,6 +56,11 @@ export async function createProfessionalBooking(input: {
     language: input.request.language,
   })
   const estimate = calculateServerEstimate(catalog)
+  const conditionLevels = await input.db.request<Array<{ id: string }>>(
+    '/rest/v1/condition_levels?code=eq.light&is_active=eq.true&select=id&limit=1',
+  )
+  const defaultConditionLevelId = conditionLevels[0]?.id
+  if (!defaultConditionLevelId) throw new Error('BOOKING_NOT_CONFIGURED')
   const basePriceCents = catalog.package?.packagePriceCents
     ?? estimate.services.reduce((total, service) => total + service.basePriceCents, 0)
   const localDate = localDateInZone(input.request.requestedStart, input.studioTimezone)
@@ -64,6 +69,8 @@ export async function createProfessionalBooking(input: {
     vehicleCategoryId: input.request.vehicleCategoryId,
     serviceIds: input.request.serviceIds,
     packageId: input.request.packageId,
+    conditionLevelId: defaultConditionLevelId,
+    conditionIndicatorIds: [],
     timezone: input.studioTimezone,
     language: input.request.language,
   }, {

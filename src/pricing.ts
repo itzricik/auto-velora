@@ -1,39 +1,36 @@
 import { siteConfig } from './config/site'
+import type { PublicCatalog } from './shared/publicCatalog'
 
+// These identifiers only control presentation and translations. All monetary,
+// duration, multiplier and package-composition values come from Supabase.
 export const services = [
-  { id: 'exterior', price: 45, hours: 2, cardDuration: '1.5–2 h', estimatorOnly: false },
-  { id: 'interior', price: 120, hours: 5, cardDuration: '4–6 h', estimatorOnly: false },
-  { id: 'correction', price: 220, hours: 8, cardDuration: '6–10 h', estimatorOnly: false },
-  { id: 'ceramic', price: 450, hours: 14, cardDuration: '1–2 days', estimatorOnly: false },
-  { id: 'ppfFront', price: 900, hours: 16, cardDuration: '1–2 days', estimatorOnly: false },
-  { id: 'ppfFull', price: 2500, hours: 40, cardDuration: '3–5 days', estimatorOnly: true },
-  { id: 'maintenance', price: 75, hours: 2.5, cardDuration: '2–3 h', estimatorOnly: false },
+  { id: 'exterior', estimatorOnly: false },
+  { id: 'interior', estimatorOnly: false },
+  { id: 'correction', estimatorOnly: false },
+  { id: 'ceramic', estimatorOnly: false },
+  { id: 'ppfFront', estimatorOnly: false },
+  { id: 'ppfFull', estimatorOnly: true },
+  { id: 'maintenance', estimatorOnly: false },
 ] as const
 
 export type ServiceId = (typeof services)[number]['id']
-
 export const serviceIds = services.map((service) => service.id) as ServiceId[]
 export const serviceCards = services.filter((service) => !service.estimatorOnly)
 
 export const vehicleTypes = [
-  { id: 'compact', multiplier: 1 },
-  { id: 'sedan', multiplier: 1.1 },
-  { id: 'suv', multiplier: 1.25 },
-  { id: 'large', multiplier: 1.4 },
+  { id: 'compact' },
+  { id: 'sedan' },
+  { id: 'suv' },
+  { id: 'large' },
 ] as const
 
 export type VehicleId = (typeof vehicleTypes)[number]['id']
 
 export const packages = [
-  { id: 'essential', price: 89, featured: false, serviceIds: ['exterior', 'maintenance'] },
-  { id: 'restore', price: 279, featured: true, serviceIds: ['exterior', 'interior', 'correction'] },
-  { id: 'protect', price: 549, featured: false, serviceIds: ['correction', 'ceramic'] },
-] as const satisfies ReadonlyArray<{
-  id: string
-  price: number
-  featured: boolean
-  serviceIds: readonly ServiceId[]
-}>
+  { id: 'essential', featured: false },
+  { id: 'restore', featured: true },
+  { id: 'protect', featured: false },
+] as const
 
 export type PackageId = (typeof packages)[number]['id']
 
@@ -43,6 +40,7 @@ export type PackagePriceEstimate = {
   multiplier: number
   baseTotal: number
   estimatedTotal: number
+  serviceIds: ServiceId[]
 }
 
 export type PriceEstimate = {
@@ -63,43 +61,60 @@ export function isVehicleId(value: string): value is VehicleId {
   return vehicleTypes.some((vehicle) => vehicle.id === value)
 }
 
-export function calculateEstimate(selectedIds: readonly ServiceId[], vehicleId: VehicleId): PriceEstimate {
+export function calculateEstimate(
+  selectedIds: readonly ServiceId[],
+  vehicleId: VehicleId,
+  catalog: PublicCatalog | null,
+): PriceEstimate {
   const uniqueIds = [...new Set(selectedIds)].filter(isServiceId)
-  const multiplier = vehicleTypes.find((vehicle) => vehicle.id === vehicleId)?.multiplier ?? 1
-  const selectedServices = services.filter((service) => uniqueIds.includes(service.id))
-  const baseTotal = selectedServices.reduce((total, service) => total + service.price, 0)
-  const baseHours = selectedServices.reduce((total, service) => total + service.hours, 0)
+  const vehicle = catalog?.vehicleCategories.find((item) => item.code === vehicleId)
+  const multiplier = Number(vehicle?.price_multiplier ?? 0)
+  const durationMultiplier = Number(vehicle?.duration_multiplier ?? 0)
+  const selectedServices = catalog?.services.filter((service) => uniqueIds.includes(service.code as ServiceId)) ?? []
+  const baseTotalCents = selectedServices.reduce((total, service) => total + service.base_price_cents, 0)
+  const baseMinutes = selectedServices.reduce((total, service) => total + service.base_duration_minutes + service.buffer_minutes, 0)
 
   return {
     serviceIds: uniqueIds,
     vehicleId,
     multiplier,
-    baseTotal,
-    estimatedTotal: Math.round(baseTotal * multiplier),
-    estimatedHours: Math.round(baseHours * multiplier * 2) / 2,
+    baseTotal: baseTotalCents / 100,
+    estimatedTotal: Math.round(baseTotalCents * multiplier) / 100,
+    estimatedHours: Math.round(baseMinutes * durationMultiplier / 30) / 2,
     pricingVersion: siteConfig.pricingVersion,
   }
 }
 
-export function calculatePackagePrice(packageId: PackageId, vehicleId: VehicleId): PackagePriceEstimate {
-  const selectedPackage = packages.find((item) => item.id === packageId)
-  const multiplier = vehicleTypes.find((vehicle) => vehicle.id === vehicleId)?.multiplier ?? 1
-  const baseTotal = selectedPackage?.price ?? 0
+export function calculatePackagePrice(
+  packageId: PackageId,
+  vehicleId: VehicleId,
+  catalog: PublicCatalog | null,
+): PackagePriceEstimate {
+  const selectedPackage = catalog?.packages.find((item) => item.code === packageId)
+  const vehicle = catalog?.vehicleCategories.find((item) => item.code === vehicleId)
+  const multiplier = Number(vehicle?.price_multiplier ?? 0)
+  const baseTotal = (selectedPackage?.package_price_cents ?? 0) / 100
+  const serviceIdsForPackage = selectedPackage?.service_ids
+    .map((id) => catalog?.services.find((service) => service.id === id)?.code)
+    .filter((code): code is ServiceId => Boolean(code && isServiceId(code))) ?? []
 
   return {
     packageId,
     vehicleId,
     multiplier,
     baseTotal,
-    estimatedTotal: Math.round(baseTotal * multiplier),
+    estimatedTotal: Math.round((selectedPackage?.package_price_cents ?? 0) * multiplier) / 100,
+    serviceIds: serviceIdsForPackage,
   }
 }
 
-export function getPackageConsistencyIssues(): string[] {
+export function getPackageConsistencyIssues(catalog: PublicCatalog | null): string[] {
+  if (!catalog) return ['catalog: unavailable']
   return packages.flatMap((item) => {
-    const includedServicesTotal = calculateEstimate(item.serviceIds, 'compact').baseTotal
-    if (item.price <= 0) return [`${item.id}: package price must be positive`]
-    if (item.price > includedServicesTotal) {
+    const packageValue = calculatePackagePrice(item.id, 'compact', catalog)
+    const includedServicesTotal = calculateEstimate(packageValue.serviceIds, 'compact', catalog).baseTotal
+    if (packageValue.baseTotal <= 0) return [`${item.id}: package price must be positive`]
+    if (packageValue.baseTotal > includedServicesTotal) {
       return [`${item.id}: package price exceeds the sum of its included base services`]
     }
     return []

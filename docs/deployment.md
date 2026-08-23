@@ -9,6 +9,7 @@ The detailed two-site procedure is in [separate-admin-deployment.md](separate-ad
 3. Apply `supabase/seed.sql` only when the service catalogue needs initializing or reconciling.
 4. Confirm RLS is enabled and `anon`/`authenticated` have no table privileges on customer, reservation, slot, history, or admin data.
 5. Disable public Auth sign-up, create the first Auth user manually, and activate its `admin_profiles` row as documented in `admin/README.md`.
+6. Enable Supabase Auth leaked-password protection before production use.
 
 ## Public Netlify project
 
@@ -18,6 +19,8 @@ The detailed two-site procedure is in [separate-admin-deployment.md](separate-ad
 - Functions directory: `netlify/functions`
 
 Keep `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`, and `TURNSTILE_SECRET_KEY` server-only. The deployed public form reads nearest/alternative starts from `/api/availability` and submits to `/api/create-reservation`; the function reloads the catalogue, recalculates price and exact duration, verifies the complete schedule, assigns one available bay, stores pending expiry and immutable snapshots, and creates every daily segment transactionally.
+
+The `reservation-media` Storage bucket is created by migration as private with JPEG/PNG/WebP and 8 MB limits. Do not make it public. Configure notification delivery initially with `NOTIFICATION_MODE=test`, then set the test recipient, Resend key, verified from-address and real owner email. Change to `live` only after delivery and translations are verified. The hourly scheduled function queues reminders/pending-expiry events and safely retries the outbox.
 
 ## Admin Netlify project
 
@@ -41,5 +44,7 @@ Set the browser-safe Supabase URL and anon key for Auth. Keep the service-role k
 - Confirm package duration is used instead of the sum of package items and package snapshots are stored.
 - Confirm an Auth user without an active profile receives `403`.
 - Confirm no service-role key or customer data appears in HTML, browser storage, or logs.
+- Confirm customer images can be uploaded, finalized, viewed by an active admin using an expiring URL, and cannot be listed or read anonymously.
+- Confirm test notification mode contacts nobody; then verify a controlled recipient before enabling live mode.
 
-Deploy only after the real privacy contact, data-controller identity, and retention policy are approved. Frontend rollback uses a prior Netlify deploy; database corrections use a new forward migration.
+Deploy only after the real privacy contact, data-controller identity, retention policy, contact details and owner-approved legal wording are configured. Frontend rollback uses a prior Netlify deploy. Database recovery uses a verified Supabase backup/PITR restore for emergencies or a new forward-only corrective migration; never edit or reverse an already applied production migration in place.

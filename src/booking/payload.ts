@@ -1,6 +1,7 @@
 import { siteConfig } from '../config/site'
-import { calculateEstimate, services, vehicleTypes, type ServiceId, type VehicleId } from '../pricing'
+import { calculateEstimate, type ServiceId, type VehicleId } from '../pricing'
 import type { Language } from '../i18n/translations'
+import type { PublicCatalog } from '../shared/publicCatalog'
 
 export type BookingPayloadInput = {
   requestReference: string
@@ -15,6 +16,7 @@ export type BookingPayloadInput = {
   language: Language
   message: string
   consentTimestamp: string
+  catalog: PublicCatalog
 }
 
 function appendOptional(payload: URLSearchParams, fieldId: string | null, value: string) {
@@ -24,9 +26,9 @@ function appendOptional(payload: URLSearchParams, fieldId: string | null, value:
 export function buildGoogleFormsPayload(input: BookingPayloadInput): URLSearchParams {
   const fields = siteConfig.googleForms.fields
   const optional = siteConfig.googleForms.optionalFields
-  const estimate = calculateEstimate(input.serviceIds, input.vehicleId)
-  const vehicle = vehicleTypes.find((item) => item.id === input.vehicleId)
-  const selectedServices = services.filter((service) => input.serviceIds.includes(service.id))
+  const estimate = calculateEstimate(input.serviceIds, input.vehicleId, input.catalog)
+  const vehicle = input.catalog.vehicleCategories.find((item) => item.code === input.vehicleId)
+  const selectedServices = input.catalog.services.filter((service) => input.serviceIds.includes(service.code as ServiceId))
   const [year, month, day] = input.selectedDate.split('-')
   const duration = `${estimate.estimatedHours} hours (client-side estimate)`
   const price = `€${estimate.estimatedTotal} (client-side estimate; non-authoritative)`
@@ -39,7 +41,7 @@ export function buildGoogleFormsPayload(input: BookingPayloadInput): URLSearchPa
     `Service IDs: ${input.serviceIds.join(', ')}`,
     `Service names: ${input.serviceNames.join(', ')}`,
     `Vehicle category: ${input.vehicleId}`,
-    `Vehicle multiplier: ${vehicle?.multiplier ?? estimate.multiplier}`,
+    `Vehicle multiplier: ${vehicle?.price_multiplier ?? estimate.multiplier}`,
     `Estimated price: ${price}`,
     `Estimated duration: ${duration}`,
     `Pricing version: ${siteConfig.pricingVersion}`,

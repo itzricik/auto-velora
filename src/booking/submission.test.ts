@@ -7,6 +7,7 @@ import {
   submitBookingRequest,
   type BookingSubmissionInput,
 } from './submission'
+import { publicCatalogFixture } from '../../tests/fixtures/publicCatalog'
 
 const submissionInput: BookingSubmissionInput = {
   name: 'Anna Berzina',
@@ -20,6 +21,7 @@ const submissionInput: BookingSubmissionInput = {
   language: 'en',
   message: 'Light swirl marks',
   consentTimestamp: '2026-07-23T09:00:00.000Z',
+  catalog: publicCatalogFixture,
 }
 
 afterEach(() => {
@@ -48,7 +50,7 @@ describe('booking submission modes', () => {
     expect(result.summary).toMatchObject({
       serviceIds: ['exterior', 'interior'],
       selectedDate: '2030-01-02',
-      estimatedPrice: 182,
+      estimatedPrice: 181.5,
       estimatedHours: 7.5,
     })
     expect(fetchSpy).not.toHaveBeenCalled()
