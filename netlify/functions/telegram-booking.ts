@@ -50,12 +50,20 @@ export default async function handler(request: Request): Promise<Response> {
     return json({ ...publicResult, profile: (await loadTelegramBookingIdentity(db, userId)).profile }, wasExisting ? 200 : 201)
   } catch (error) {
     const code = error instanceof Error ? error.message : 'TELEGRAM_BOOKING_FAILED'
+    console.error(JSON.stringify({
+      event: 'telegram_booking_failed',
+      requestId: id,
+      code,
+      databaseStatus: error instanceof SupabaseError ? error.status : undefined,
+      databaseCode: error instanceof SupabaseError ? error.code : undefined,
+    }))
     if (code.startsWith('TELEGRAM_SESSION_')) return apiError(401, 'TELEGRAM_SESSION_INVALID', 'Open the Mini App again from Telegram.', id)
     if (code === 'BODY_TOO_LARGE') return apiError(413, code, 'The request body is too large.', id)
     if (code === 'INVALID_JSON') return apiError(400, code, 'Submit valid JSON.', id)
     if (code === 'INVALID_REQUESTED_START') return apiError(422, code, 'Select an available future time.', id)
     if (code === 'OVERNIGHT_ACK_REQUIRED') return apiError(422, code, 'Acknowledge the next-working-day continuation.', id)
-    if (code === 'SCHEDULING_CONFLICT' || error instanceof SupabaseError && error.details?.includes('SCHEDULING_CONFLICT')) {
+    if (code === 'SCHEDULING_CONFLICT' || code === 'SLOT_UNAVAILABLE'
+      || error instanceof SupabaseError && error.details?.includes('SCHEDULING_CONFLICT')) {
       return apiError(409, 'SCHEDULING_CONFLICT', 'That time is no longer available.', id)
     }
     if (code.includes('TELEGRAM_CUSTOMER') || code.includes('TELEGRAM_VEHICLE')) return apiError(422, code, 'Check the saved profile and vehicle.', id)

@@ -48,6 +48,7 @@ export function TelegramBookingFlow({ app, token, profile, catalog, language, in
   const [selectedStart, setSelectedStart] = useState('')
   const [estimate, setEstimate] = useState({ priceMinCents: 0, priceMaxCents: 0, durationMinMinutes: 0, durationMaxMinutes: 0 })
   const [availability, setAvailability] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [availabilityRevision, setAvailabilityRevision] = useState(0)
   const [name, setName] = useState(profile.customer?.fullName ?? `${profile.firstName} ${profile.lastName ?? ''}`.trim())
   const [phone, setPhone] = useState(profile.customer?.phone ?? '')
   const [email, setEmail] = useState(profile.customer?.email ?? '')
@@ -85,7 +86,7 @@ export function TelegramBookingFlow({ app, token, profile, catalog, language, in
       if ((reason as Error).name !== 'AbortError') setAvailability('error')
     }), 180)
     return () => { window.clearTimeout(timeout); controller.abort() }
-  }, [availabilityKey, conditionLevelId, date, language, serviceIds, vehicleCategoryId])
+  }, [availabilityKey, availabilityRevision, conditionLevelId, date, language, serviceIds, vehicleCategoryId])
 
   const valid = serviceIds.length > 0 && vehicleDescription.trim().length >= 2 && selectedStart
     && name.trim().length >= 2 && normalizePhone(phone).replace(/\D/g, '').length >= 8
@@ -117,8 +118,22 @@ export function TelegramBookingFlow({ app, token, profile, catalog, language, in
       })
     } catch (reason) {
       const code = reason instanceof TelegramApiError ? reason.code : 'API_ERROR'
-      setError(code === 'SCHEDULING_CONFLICT' ? copy.conflict : copy.error)
-      if (code === 'SCHEDULING_CONFLICT') { setSelectedStart(''); setStage('configure') }
+      const scheduleChanged = code === 'SCHEDULING_CONFLICT' || code === 'INVALID_REQUESTED_START'
+      setError(code === 'SCHEDULING_CONFLICT' ? copy.conflict
+        : code === 'INVALID_REQUESTED_START' ? copy.invalidStart
+          : code === 'OVERNIGHT_ACK_REQUIRED' ? copy.overnightRequired
+            : code === 'RATE_LIMITED' ? copy.rateLimited
+              : code === 'VALIDATION_FAILED' ? copy.validation
+                : copy.error)
+      if (scheduleChanged) {
+        setSelectedStart('')
+        setSlots([])
+        setStage('configure')
+        setAvailabilityRevision((current) => current + 1)
+      } else if (code === 'OVERNIGHT_ACK_REQUIRED') {
+        setOvernight(false)
+        setStage('configure')
+      }
       app?.HapticFeedback?.notificationOccurred('error')
     } finally {
       setSubmitting(false)
