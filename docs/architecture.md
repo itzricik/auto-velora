@@ -9,6 +9,7 @@ sequenceDiagram
   participant P as Supabase PostgreSQL
   participant A as Separate admin browser
   participant AN as Admin Netlify Functions
+  participant T as Telegram Mini App / Bot
 
   C->>PN: GET /api/availability
   PN->>P: Shared scheduling_availability RPC
@@ -21,6 +22,12 @@ sequenceDiagram
   P->>P: Customer, vehicle, snapshots and same-bay work segments
   P-->>PN: Committed reference, estimate and schedule
   PN-->>C: Safe success response
+
+  T->>PN: Signed initData or secret webhook
+  PN->>PN: HMAC, age, session, method and size validation
+  T->>PN: Telegram booking selections
+  PN->>P: Same catalog, availability and v3 scheduling transaction
+  P-->>T: Linked booking reference and safe profile projection
 
   A->>P: Supabase Auth sign-in
   A->>AN: Admin request with access token
@@ -35,6 +42,7 @@ The two Netlify projects share one Supabase project but no source runtime or dep
 - Root `src/` is the existing public VELORA site. Its appearance, EN/LV/RU translations, estimator, gallery, animation, and responsive layout remain unchanged.
 - `netlify/functions/create-reservation.ts` is the public write boundary. The browser supplies a requested start and catalogue selections, but never a trusted price, duration, bay, or end time.
 - `admin/` is a separate React and TypeScript application with its own build, environment file, Netlify configuration, and serverless functions.
+- `src/telegram/` is a route-scoped adaptive client. `telegram-auth`, `telegram-profile`, `telegram-booking`, and `telegram-webhook` are server-only identity/data boundaries; they never expose the Supabase service role or Bot token.
 - The public function schedules only after verifying the complete duration on one bay. Administrators can create, reschedule, block, cancel, and complete work from the separate admin site.
 
 ## Admin endpoints

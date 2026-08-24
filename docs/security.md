@@ -15,6 +15,7 @@ Server-only secrets:
 - Supabase service-role key;
 - rate-limit signing secret;
 - optional Turnstile secret.
+- Telegram Bot token, webhook secret and Mini App session-signing secret.
 
 ## Threat controls
 
@@ -30,6 +31,9 @@ Server-only secrets:
 | Private image disclosure | Private bucket, signed upload paths, object verification and five-minute admin read URLs | A copied signed URL remains usable until its short expiry |
 | Notification duplication | Unique event idempotency keys plus atomic `skip locked` claims and bounded retries | Provider-side delivery after a network timeout can still be ambiguous |
 | Pending holds | Configurable expiry, opportunistic expiry before planning/schedule operations, released segments and history | A dedicated scheduled expiry job can make release timing proactive even without traffic |
+| Telegram identity spoofing | Server recomputes the official Mini App HMAC, rejects stale/future `auth_date`, and issues a short-lived signed session | Bot-token compromise permits impersonation and requires immediate rotation |
+| Forged bot webhook | Telegram secret-token header, constant-time comparison and update-ID idempotency | Compromised webhook or bot secret must be rotated |
+| Cross-account car/booking access | Telegram ID is taken only from verified auth/session; repository queries bind every object to its linked customer | Deliberate customer-account merge remains an administrator-only privacy operation |
 
 ## Administrator sessions
 
@@ -47,7 +51,7 @@ The policy permits:
 - local data-URI fonts/images used by the site;
 - optional Cloudflare Turnstile script, frame and connection endpoints.
 
-It denies objects, framing, camera, geolocation and microphone. `unsafe-inline` remains for existing inline styles/scripts and should be replaced with nonces or hashes in a future hardening pass. Google Forms is no longer allowed because production bookings use the Netlify function.
+It denies objects, camera, geolocation and microphone. Framing is restricted to Telegram origins so Telegram Desktop can host `/telegram`; the official `telegram.org` bridge script is allowed and loaded only by that route. `unsafe-inline` remains for existing inline styles/scripts and should be replaced with nonces or hashes in a future hardening pass. Google Forms is no longer allowed because production bookings use the Netlify function.
 
 ## Privacy launch blockers
 

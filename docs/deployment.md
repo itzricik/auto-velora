@@ -22,6 +22,8 @@ Keep `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`, and `TURNSTILE_SECRET_KEY
 
 The `reservation-media` Storage bucket is created by migration as private with JPEG/PNG/WebP and 8 MB limits. Do not make it public. Configure notification delivery initially with `NOTIFICATION_MODE=test`, then set the test recipient, Resend key, verified from-address and real owner email. Change to `live` only after delivery and translations are verified. The hourly scheduled function queues reminders/pending-expiry events and safely retries the outbox.
 
+For Telegram, apply `20260824101328_telegram_mini_app.sql`, then follow [Telegram Mini App setup](telegram-mini-app.md). Deploy first with `TELEGRAM_NOTIFICATION_MODE=disabled`; register the webhook only after the new Functions are live. The Bot token, webhook secret and session secret are public-site Function variables and must never use a `VITE_` prefix.
+
 ## Admin Netlify project
 
 - Base directory: `admin`
@@ -46,5 +48,7 @@ Set the browser-safe Supabase URL and anon key for Auth. Keep the service-role k
 - Confirm no service-role key or customer data appears in HTML, browser storage, or logs.
 - Confirm customer images can be uploaded, finalized, viewed by an active admin using an expiring URL, and cannot be listed or read anonymously.
 - Confirm test notification mode contacts nobody; then verify a controlled recipient before enabling live mode.
+- Confirm invalid/stale Telegram `initData` and missing webhook-secret headers receive `401` without creating a profile.
+- Confirm a Telegram reservation uses the same server price and schedule, appears in admin, and is visible only to the verified linked Telegram user.
 
 Deploy only after the real privacy contact, data-controller identity, retention policy, contact details and owner-approved legal wording are configured. Frontend rollback uses a prior Netlify deploy. Database recovery uses a verified Supabase backup/PITR restore for emergencies or a new forward-only corrective migration; never edit or reverse an already applied production migration in place.

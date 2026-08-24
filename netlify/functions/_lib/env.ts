@@ -70,3 +70,38 @@ export function getNotificationConfig() {
     testRecipient: getOptionalEnvironment('NOTIFICATION_TEST_RECIPIENT'),
   }
 }
+
+export function getTelegramAuthConfig() {
+  return {
+    botToken: required('TELEGRAM_BOT_TOKEN'),
+    sessionSecret: required('TELEGRAM_SESSION_SECRET'),
+    authMaxAgeSeconds: positiveInteger('TELEGRAM_AUTH_MAX_AGE_SECONDS', 3_600),
+    sessionTtlSeconds: positiveInteger('TELEGRAM_SESSION_TTL_SECONDS', 43_200),
+  }
+}
+
+export function getTelegramSessionConfig() {
+  return { sessionSecret: required('TELEGRAM_SESSION_SECRET') }
+}
+
+export function getTelegramBotConfig() {
+  const runtime = getRuntimeConfig()
+  const miniAppUrl = getOptionalEnvironment('TELEGRAM_MINI_APP_URL') ?? `${runtime.publicSiteUrl}/telegram`
+  if (!miniAppUrl.startsWith('https://')) throw new Error('CONFIG_TELEGRAM_MINI_APP_URL')
+  return {
+    botToken: required('TELEGRAM_BOT_TOKEN'),
+    botUsername: getOptionalEnvironment('TELEGRAM_BOT_USERNAME'),
+    webhookSecret: required('TELEGRAM_WEBHOOK_SECRET'),
+    miniAppUrl,
+  }
+}
+
+export function getTelegramNotificationConfig() {
+  const mode = getOptionalEnvironment('TELEGRAM_NOTIFICATION_MODE') ?? 'disabled'
+  if (!['disabled', 'test', 'live'].includes(mode)) throw new Error('CONFIG_TELEGRAM_NOTIFICATION_MODE')
+  return {
+    mode: mode as 'disabled' | 'test' | 'live',
+    botToken: getOptionalEnvironment('TELEGRAM_BOT_TOKEN'),
+    testChatId: getOptionalEnvironment('TELEGRAM_TEST_CHAT_ID'),
+  }
+}

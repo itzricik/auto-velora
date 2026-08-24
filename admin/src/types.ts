@@ -129,7 +129,7 @@ export type Reservation = {
   duration_override_reason: string | null
   checklist_override_reason: string | null
   language: 'en' | 'lv' | 'ru'
-  source: 'public_website' | 'admin' | 'phone' | 'walk_in' | 'legacy'
+  source: 'public_website' | 'telegram' | 'admin' | 'phone' | 'walk_in' | 'legacy'
   customer: { id: string; full_name: string; phone: string; email: string | null; normalized_phone: string; normalized_email: string; internal_notes: string | null; created_at: string }
   vehicle: { id: string; make_model: string; vehicle_type: string; vehicle_category_id: string; registration_number: string | null; applied_protection: string | null; recommended_maintenance_date: string | null; internal_notes: string | null }
   services: ReservationService[]

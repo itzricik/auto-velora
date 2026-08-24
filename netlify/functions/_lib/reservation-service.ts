@@ -42,6 +42,10 @@ export async function createPendingReservation(input: {
   maxDaysAhead: number
   requestId: string
   now?: Date
+  transaction?: {
+    rpcPath: string
+    extraBody: Record<string, unknown>
+  }
 }): Promise<PublicReservationResult & { reservationId: string; wasExisting: boolean }> {
   const now = input.now ?? new Date()
   const notBefore = new Date(now.getTime() + Math.max(0, input.minNoticeHours) * 3_600_000)
@@ -103,7 +107,7 @@ export async function createPendingReservation(input: {
   let result: TransactionResult | undefined
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const rows = await input.db.request<TransactionResult[]>('/rest/v1/rpc/create_scheduled_reservation_transactional_v3', {
+      const rows = await input.db.request<TransactionResult[]>(input.transaction?.rpcPath ?? '/rest/v1/rpc/create_scheduled_reservation_transactional_v3', {
         method: 'POST',
         body: JSON.stringify({
           p_reference: createSecureReference(now),
@@ -129,6 +133,7 @@ export async function createPendingReservation(input: {
             buffer_minutes: catalog.package.bufferMinutes ?? 0,
           } : null,
           p_condition_snapshot: conditionSnapshot,
+          ...input.transaction?.extraBody,
         }),
       })
       result = rows[0]

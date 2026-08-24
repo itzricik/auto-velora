@@ -11,6 +11,7 @@ type OutboxRow = {
   language: BookingLanguage
   status: string
   attempt_count: number
+  channel?: 'email' | 'telegram'
 }
 
 type ReservationRow = {
@@ -154,8 +155,8 @@ export async function processReservationNotifications(
   reservationId: string | null = null,
   fetcher: typeof fetch = fetch,
 ): Promise<{ sent: number; failed: number; suppressed: number }> {
-  const rows = await db.request<OutboxRow[]>('/rest/v1/rpc/claim_notification_outbox', {
-    method: 'POST', body: JSON.stringify({ p_reservation_id: reservationId, p_limit: reservationId ? 10 : 25 }),
+  const rows = await db.request<OutboxRow[]>('/rest/v1/rpc/claim_notification_outbox_channel', {
+    method: 'POST', body: JSON.stringify({ p_channel: 'email', p_reservation_id: reservationId, p_limit: reservationId ? 10 : 25 }),
   })
   const outcome = { sent: 0, failed: 0, suppressed: 0 }
   for (const outbox of rows) {

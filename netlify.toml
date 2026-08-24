@@ -22,6 +22,26 @@
   status = 200
 
 [[redirects]]
+  from = "/api/telegram/auth"
+  to = "/.netlify/functions/telegram-auth"
+  status = 200
+
+[[redirects]]
+  from = "/api/telegram/profile"
+  to = "/.netlify/functions/telegram-profile"
+  status = 200
+
+[[redirects]]
+  from = "/api/telegram/booking"
+  to = "/.netlify/functions/telegram-booking"
+  status = 200
+
+[[redirects]]
+  from = "/api/telegram/webhook"
+  to = "/.netlify/functions/telegram-webhook"
+  status = 200
+
+[[redirects]]
   from = "/api/reservation-media"
   to = "/.netlify/functions/reservation-media"
   status = 200
@@ -60,8 +80,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; base-uri 'self'; connect-src 'self' https://tuqyyocmykuryoycysmn.supabase.co https://challenges.cloudflare.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob: https:; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; connect-src 'self' https://tuqyyocmykuryoycysmn.supabase.co https://challenges.cloudflare.com; font-src 'self' data:; form-action 'self'; frame-ancestors https://web.telegram.org https://*.telegram.org; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob: https:; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://telegram.org; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests"
     Permissions-Policy = "camera=(), geolocation=(), microphone=()"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"

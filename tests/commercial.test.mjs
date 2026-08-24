@@ -94,7 +94,10 @@ function notificationDatabase() {
   return {
     updates, queued,
     db: { async request(path, init = {}) {
-      if (path === '/rest/v1/rpc/claim_notification_outbox') return [{ id: 'a0000000-0000-4000-8000-000000000001', reservation_id: '60000000-0000-4000-8000-000000000001', event_type: 'booking_requested', audience: 'customer', recipient: null, language: 'lv', status: 'pending', attempt_count: 1 }]
+      if (path === '/rest/v1/rpc/claim_notification_outbox_channel') {
+        assert.equal(JSON.parse(init.body).p_channel, 'email')
+        return [{ id: 'a0000000-0000-4000-8000-000000000001', reservation_id: '60000000-0000-4000-8000-000000000001', event_type: 'booking_requested', audience: 'customer', recipient: null, language: 'lv', status: 'pending', attempt_count: 1 }]
+      }
       if (path.startsWith('/rest/v1/reservations?')) return [{ id: '60000000-0000-4000-8000-000000000001', reference: 'VEL-2030-ABCDEFGH', status: 'pending', starts_at: '2030-01-02T09:00:00.000Z', ends_at: '2030-01-02T11:00:00.000Z', estimated_total_min_cents: 4500, estimated_total_max_cents: 6500, estimated_total_cents: 4500, language: 'lv', customer_id: 'c0000000-0000-4000-8000-000000000001', vehicle_id: 'd0000000-0000-4000-8000-000000000001' }]
       if (path.startsWith('/rest/v1/customers?')) return [{ full_name: 'Customer', phone: '+37120000001', email: 'customer@example.test' }]
       if (path.startsWith('/rest/v1/vehicles?')) return [{ make_model: 'Vehicle' }]

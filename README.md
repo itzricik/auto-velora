@@ -9,6 +9,8 @@ Public site: <https://autodetailing-velora.netlify.app/>
 ```mermaid
 flowchart LR
   Customer[Customer browser] -->|same-origin JSON| Netlify[Netlify Functions]
+  Telegram[Telegram Mini App] -->|validated initData + short session| Netlify
+  Bot[Telegram Bot API] -->|secret webhook| Netlify
   Admin[Separate admin browser] -->|Supabase Auth token| AdminNetlify[Admin Netlify Functions]
   Admin -->|password and refresh grants| Auth[Supabase Auth]
   Netlify -->|service role, server only| Database[Supabase PostgreSQL]
@@ -17,6 +19,7 @@ flowchart LR
 ```
 
 - `src/` contains the visually unchanged storefront and its API booking form.
+- `src/telegram/` is the adaptive `/telegram` client; it reuses the same public catalog, availability and booking engine.
 - `netlify/functions/create-reservation.ts` is the public booking write boundary.
 - `admin/` is the separate authenticated React application and its own Netlify Functions.
 - `supabase/migrations/` creates the schema, explicit deny-by-default RLS policies, atomic rate limits, private media, notification outbox, transactional booking insertion, and audited admin updates.
@@ -95,6 +98,12 @@ Set these in Netlify, using the existing Supabase project values:
 | `RESEND_API_KEY` | Functions secret | required only in `live` mode |
 | `RESEND_FROM_EMAIL` | Functions | required only in `live` mode |
 | `BOOKING_OWNER_EMAIL` | Functions | required for administrator notifications in `live` mode |
+| `TELEGRAM_BOT_TOKEN` | Functions secret | required for Telegram authentication, bot and live delivery |
+| `TELEGRAM_WEBHOOK_SECRET` | Functions secret | required for the Bot API webhook |
+| `TELEGRAM_SESSION_SECRET` | Functions secret | required; independent random value of 32+ characters |
+| `TELEGRAM_MINI_APP_URL` | Functions | exact public `/telegram` HTTPS URL |
+| `TELEGRAM_NOTIFICATION_MODE` | Functions | `disabled`, `test`, or `live` |
+| `TELEGRAM_TEST_CHAT_ID` | Functions | required only for controlled test delivery |
 
 Never use a `VITE_` prefix for `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`, or a Turnstile secret.
 
@@ -118,6 +127,7 @@ Never use a `VITE_` prefix for `SUPABASE_SERVICE_ROLE_KEY`, `RATE_LIMIT_SECRET`,
 - Honeypot, body-size limits, field lengths, origin checks, optional Turnstile, and atomic database rate limiting protect the public endpoint.
 - Vehicle photographs use a private Storage bucket, path-bound signed uploads, server-side object verification, short-lived signed previews, metadata-stripping browser re-encoding where supported, and audited administrator removal.
 - Notification events are idempotently queued and claimed with `skip locked`; missing provider credentials never break booking.
+- Telegram `initData` is HMAC-validated on the server with freshness checks. `initDataUnsafe`, browser prices and browser identity fields are never trusted.
 
 ## Business configuration
 
@@ -125,4 +135,4 @@ The administrator Settings page is the central source for the public business na
 
 The new compact administration application is a separate project under [`admin/`](admin/README.md). See the [separate public/admin deployment guide](docs/separate-admin-deployment.md) for the shared Supabase migration, two-Netlify-project setup, and first-administrator procedure.
 
-See [commercial operations](docs/commercial-operations.md), [deployment instructions](docs/deployment.md), [database design](docs/database.md), and the [administrator guide](docs/admin-guide.md).
+See [Telegram Mini App setup](docs/telegram-mini-app.md), [commercial operations](docs/commercial-operations.md), [deployment instructions](docs/deployment.md), [database design](docs/database.md), and the [administrator guide](docs/admin-guide.md).

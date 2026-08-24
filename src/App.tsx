@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { Services } from './components/Services'
@@ -15,6 +15,8 @@ import type { ServiceId, VehicleId } from './pricing'
 import { BookingManager } from './components/BookingManager'
 import { CommercialContent } from './components/CommercialContent'
 import { CatalogProvider } from './booking/CatalogContext'
+
+const TelegramApp = lazy(async () => ({ default: (await import('./telegram/TelegramApp')).TelegramApp }))
 
 function getInitialLanguage(): Language {
   const saved = window.localStorage.getItem('velora-language')
@@ -58,6 +60,10 @@ export default function App() {
   const choosePackage = (serviceIds: ServiceId[]) => {
     setSelectedServices(serviceIds)
     window.setTimeout(scrollToBooking, 0)
+  }
+
+  if (window.location.pathname === '/telegram') {
+    return <CatalogProvider><Suspense fallback={<main className="tg-centered"><span className="tg-loader" /></main>}><TelegramApp /></Suspense></CatalogProvider>
   }
 
   if (window.location.pathname === '/booking') {

@@ -12,6 +12,7 @@ const schedulingFixes = readFileSync('supabase/migrations/20260814101233_schedul
 const schedulingSafety = readFileSync('supabase/migrations/20260814101413_scheduling_defaults_and_package_safety.sql', 'utf8').toLowerCase()
 const adminTransactionFix = readFileSync('supabase/migrations/20260814102055_fix_admin_transaction_ambiguity.sql', 'utf8').toLowerCase()
 const repeatCustomerFix = readFileSync('supabase/migrations/20260821185826_fix_repeat_customer_booking.sql', 'utf8').toLowerCase()
+const telegramMiniApp = readFileSync('supabase/migrations/20260824101328_telegram_mini_app.sql', 'utf8').toLowerCase()
 
 const requiredTables = [
   'customers',
@@ -101,6 +102,18 @@ const requiredRepeatCustomerFix = [
   'returning id into v_customer_id',
   'security invoker',
 ]
+const requiredTelegramMiniApp = [
+  'create table public.telegram_profiles',
+  'create table public.telegram_bot_updates',
+  "source in ('public_website', 'telegram', 'admin'",
+  'create_telegram_reservation_transactional_v1',
+  'create_scheduled_reservation_transactional_v3',
+  'claim_notification_outbox_channel',
+  'queue_due_telegram_notifications',
+  'enable row level security',
+  'from public, anon, authenticated',
+  'to service_role',
+]
 
 const missing = [
   ...requiredSchema.filter((value) => !schema.includes(value)),
@@ -114,6 +127,7 @@ const missing = [
   ...requiredSchedulingSafety.filter((value) => !schedulingSafety.includes(value)),
   ...requiredAdminTransactionFix.filter((value) => !adminTransactionFix.includes(value)),
   ...requiredRepeatCustomerFix.filter((value) => !repeatCustomerFix.includes(value)),
+  ...requiredTelegramMiniApp.filter((value) => !telegramMiniApp.includes(value)),
 ]
 
 if (missing.length) {
